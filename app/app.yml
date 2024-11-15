@@ -41,7 +41,7 @@ default_events:
   - push
 # - release
   - repository
-  - repository_import
+# - repository_import
 # - status
 # - team
 # - team_add
