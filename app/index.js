@@ -26,6 +26,10 @@ module.exports = (app) => {
       "new": true,
       "message": "New Repository!"
     };
+    // TODO: the token generated from this app is _specific to the repo that
+    // triggered the webhook_. This means that I ne3ed to store the installation
+    // ID and/or the access token as a secret and somehow use that in place of
+    // the existing token. 
     const dispatch = {
       "owner": "hubverse-org",
       "repo": "hub-dashboard-control-room",
