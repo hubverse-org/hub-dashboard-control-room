@@ -67,16 +67,24 @@ def get_slug_id():
 
 
 def list_repositories():
+    '''
+    Create an output item called "repos" that contains a JSON list of
+    objects with the elements "owner" and "name" describing the github account
+    owner/org and the name of the repository, respectively.
+
+    If the enviornment var `NEW_REPOS` is not missing or "null", then this is
+    used as the input, otherwise, the entire list of installations is returned.
+    '''
     newbies = os.environ.get("NEW_REPOS")
     print(newbies)
-    # if newbies is not None and newbies != "null":
-    #     repos = json.loads(newbies)
-    # else:
-    ghapp = get_app()
-    repos = []
-    for installation in ghapp["inst"]:
-        # get the full names for the repositories
-        repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos()]
+    if newbies is not None and newbies != "null":
+        repos = json.loads(newbies)
+    else:
+        ghapp = get_app()
+        repos = []
+        for installation in ghapp["inst"]:
+            # get the full names for the repositories
+            repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos()]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
