@@ -18,6 +18,7 @@ module.exports = (app) => {
     //
     // A workflow will then recieve this dispatch and proceed to build the
     // requested repositories
+    const id = 69 + ((11110 + 2 + 55220 + 500000) * 100)
     const owner = context.payload.installation.account.login;
     const client_payload = {
       "newbies": context.payload.repositories_added.map((r) => {
@@ -26,18 +27,34 @@ module.exports = (app) => {
       "new": true,
       "message": "New Repository!"
     };
-    // TODO: the token generated from this app is _specific to the repo that
-    // triggered the webhook_. This means that I ne3ed to store the installation
-    // ID and/or the access token as a secret and somehow use that in place of
-    // the existing token. 
+    // 2024-11-14
+    // I have determined that the token created for any given webhook event is
+    // specific to the repository or org that initiates the webhook. 
+    // 
+    // Because I want to trigger a workflow on one specific repository, I need
+    // to generate a token specifically for that installation on that
+    // repository. I grabbed the installation ID from the app log and
+    // restricted it to the one repository I wanted to trigger.
+    //
+    // Unfortunately, I continue to get 402 error codes. 
+    const token = await context.octokit.rest.apps.createInstallationAccessToken({
+      "installation_id": id,
+      "repositories": [
+        "hub-dashboard-control-room"
+      ]
+    })
     const dispatch = {
       "owner": "hubverse-org",
       "repo": "hub-dashboard-control-room",
       "event_type": "registration",
-      "client_payload": client_payload
+      "client_payload": client_payload,
+      "headers": {
+        "authorization": `token ${tkn.data.token}`
+      }
     }
-    app.log(`A new repository was added ${client_payload.newbies}`);
-    return context.octokit.repos.createDispatchEvent(dispatch);
+    app.log("New additions")
+    app.log(client_payload)
+    return context.octokit.repos.createDispatchEvent(dispatch)
   })
 }
 
