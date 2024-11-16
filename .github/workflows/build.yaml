@@ -43,6 +43,8 @@ jobs:
       - id: install
         run: pip install -r requirements.txt
       - id: repos
+        env:
+          NEW_REPOS: ${{ steps.new-repos.outputs.new }}
         run: python getInstallations.py
   build-data:
     name: "Generate PredTimeChart data"
