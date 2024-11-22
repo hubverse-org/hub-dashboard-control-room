@@ -68,7 +68,7 @@ jobs:
       - id: install-predtimechart-tool
         run: |
           pip install --upgrade pip
-          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
+          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart@znk/skip-existing/32
       - uses: actions/create-github-app-token@v1
         id: token
         with:
@@ -76,7 +76,7 @@ jobs:
           private-key: ${{ secrets.PRIVATE_KEY }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
-      - id: checkout-pages
+      - id: checkout-config
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token }}
@@ -86,6 +86,14 @@ jobs:
           sparse-checkout: |
             predtimechart-config.yml
             site-config.yml
+      - id: checkout-data
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token }}
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+          branch: 'ptc/data'
+          path: 'out'
       - id: get-repo-name
         run: |
           yq eval '.hub' site-config.yml \
