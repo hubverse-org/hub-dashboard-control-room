@@ -5,6 +5,7 @@ repo="${2:-missing}"
 slug="${3:-missing}"
 email="${4:-missing}"
 token="${5:-missing}"
+commitargs="${5:-}"
 
 if [[ "$branch" == "gh-pages" ]];then
   dir="pages"
@@ -20,10 +21,11 @@ git config --global user.email "${email}"
 git remote set-url origin "https://${slug}[bot]:${token}@github.com/${repo}.git"
 ls
 git status
-# remove old data/site contents
-git rm -r "*" || echo "nothing to do"
+if [[ -n $(grep 'amend' <<< "${commitargs}") ]]; then
+  # remove old data/site contents
+  git rm -r "*" || echo "nothing to do"
+fi
 if [[ "$branch" == "gh-pages" ]]; then
-  # remove everything in the old site
   cp -R ../_site/* .
   touch .nojekyll
 else 
@@ -31,7 +33,7 @@ else
   cp -R ../targets .
   cp ../predtimechart-options.json .
 fi
-git add . && git commit --amend -m "$msg"
+git add . && git commit "${commitargs}" -m "$msg"
 git status
 git push --force
 cd 

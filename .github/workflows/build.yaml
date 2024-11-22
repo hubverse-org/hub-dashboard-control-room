@@ -277,7 +277,8 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ needs.repos.outputs.slug }}" \
             "${{ needs.repos.outputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token }}" \
+            --amend
 
   
 
