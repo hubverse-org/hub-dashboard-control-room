@@ -92,7 +92,7 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
-          branch: 'ptc/data'
+          ref: 'ptc/data'
           path: 'out'
       - id: get-repo-name
         run: |
@@ -106,6 +106,7 @@ jobs:
           repository: ${{ steps.get-repo-name.outputs.repo }}
           path: 'repo'
       - id: json-lives
+        name: "Genereate Predtimechart data"
         run: |
           ls -larth repo/
           ls -larth
