@@ -68,7 +68,7 @@ jobs:
       - id: install-predtimechart-tool
         run: |
           pip install --upgrade pip
-          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart@znk/skip-existing/32
+          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - uses: actions/create-github-app-token@v1
         id: token
         with:
