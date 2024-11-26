@@ -20,11 +20,18 @@ jobs:
       PRIVATE_KEY: ${{ secrets.key }}
     runs-on: ubuntu-latest
     outputs:
-      repos: ${{ steps.repos.outputs.repos }}
-      slug: ${{ steps.repos.outputs.slug }}
-      id: ${{ steps.repos.outputs.id }}
-      email: ${{ steps.repos.outputs.email }}
-      token: ${{ steps.token.outputs.token }}
+      repos: 
+        description: "a list of JSON objects containing 'owner' and 'name'"
+        value: ${{ steps.repos.outputs.repos }}
+      slug: 
+        description: "the app slug"
+        value: ${{ steps.repos.outputs.slug }}
+      id: 
+        description: "the app id"
+        value: ${{ steps.repos.outputs.id }}
+      email: 
+        description: "the app email"
+        value: ${{ steps.repos.outputs.email }}
     steps:
       - id: new-repos
         run: |
