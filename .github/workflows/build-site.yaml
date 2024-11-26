@@ -12,9 +12,6 @@ on:
       email:
         required: true
         type: string
-    secrets:
-      token:
-        required: false
   repository_dispatch:
     types: ["site-build"]
 
@@ -35,7 +32,6 @@ jobs:
     steps:
       - uses: actions/create-github-app-token@v1
         name: "Generate App Token (if no token present)"
-        if: ${{ secrets.token == '' }}
         id: token
         with:
           app-id: ${{ vars.APP_ID }}
@@ -51,7 +47,7 @@ jobs:
       - id: checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token || secrets.token }}
+          token: ${{ steps.token.outputs.token }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: build-site
