@@ -11,6 +11,19 @@ on:
         required: true
       key:
         required: true
+    outputs:
+      repos: 
+        description: "a list of JSON objects containing 'owner' and 'name'"
+        value: ${{ jobs.repos.outputs.repos }}
+      slug: 
+        description: "the app slug"
+        value: ${{ jobs.repos.outputs.slug }}
+      id: 
+        description: "the app id"
+        value: ${{ jobs.repos.outputs.id }}
+      email: 
+        description: "the app email"
+        value: ${{ jobs.repos.outputs.email }}
 
 jobs:
   repos:
@@ -20,18 +33,10 @@ jobs:
       PRIVATE_KEY: ${{ secrets.key }}
     runs-on: ubuntu-latest
     outputs:
-      repos: 
-        description: "a list of JSON objects containing 'owner' and 'name'"
-        value: ${{ steps.repos.outputs.repos }}
-      slug: 
-        description: "the app slug"
-        value: ${{ steps.repos.outputs.slug }}
-      id: 
-        description: "the app id"
-        value: ${{ steps.repos.outputs.id }}
-      email: 
-        description: "the app email"
-        value: ${{ steps.repos.outputs.email }}
+      repos: ${{ steps.repos.outputs.repos }}
+      slug: ${{ steps.repos.outputs.slug }}
+      id: ${{ steps.repos.outputs.id }}
+      email: ${{ steps.repos.outputs.email }}
     steps:
       - id: new-repos
         run: |
