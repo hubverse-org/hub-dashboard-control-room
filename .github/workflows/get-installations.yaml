@@ -48,7 +48,7 @@ jobs:
       - id: checkout
         uses: actions/checkout@v4
         with:
-          repoistory: hubverse-org/hub-dashboard-control-room
+          repository: hubverse-org/hub-dashboard-control-room
           persist-credentials: false
           sparse-checkout: |
             requirements.txt
