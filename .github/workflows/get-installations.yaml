@@ -12,16 +12,16 @@ on:
       key:
         required: true
     outputs:
-      repos: 
+      repos:
         description: "a list of JSON objects containing 'owner' and 'name'"
         value: ${{ jobs.repos.outputs.repos }}
-      slug: 
+      slug:
         description: "the app slug"
         value: ${{ jobs.repos.outputs.slug }}
-      id: 
+      id:
         description: "the app id"
         value: ${{ jobs.repos.outputs.id }}
-      email: 
+      email:
         description: "the app email"
         value: ${{ jobs.repos.outputs.email }}
 
@@ -47,6 +47,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - id: checkout
         uses: actions/checkout@v4
+        repoistory: hubverse-org/hub-dashboard-control-room
         with:
           persist-credentials: false
           sparse-checkout: |
