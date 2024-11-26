@@ -22,9 +22,11 @@ on:
 
 jobs:
   build-site:
-    name: "Generate Static Site"
+    name: "Build Site"
     runs-on: ubuntu-latest
     continue-on-error: true
+    outputs:
+      success: ${{ steps.result.outputs.success }}
     strategy: 
       matrix: 
         site: ${{ fromJSON(inputs.repos) }}
@@ -56,16 +58,24 @@ jobs:
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: build-site
-        run: bash -x /render.sh "${{ matrix.site.owner }}" "${{ matrix.site.name }}" ptc/data
+        run: |
+          bash -x /render.sh "${{ matrix.site.owner }}" "${{ matrix.site.name }}" ptc/data \
+          && echo "success=true" >> $GITHUB_OUTPUT \
+          || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
+        if: ${{ steps.build-site.outputs.success }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
           path: '/site/pages/'
           retention-days: 1
+      - name: signal success
+        if: ${{ steps.build-site.outputs.success }}
+        run: |
+          touch "${{runner.temp}}/${{steps.id.outputs.repo}}.success" 
   push-site:
-    name: "Push Static Site to gh-pages branch"
+    name: "Push Site"
     runs-on: ubuntu-latest
     needs: [build-site]
     continue-on-error: true
@@ -73,20 +83,28 @@ jobs:
       matrix:
         site: ${{ fromJSON(inputs.repos) }}
     steps:
-      - id: checkout-this-here-repo-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: hubverse-org/hub-dashboard-control-room
-          persist-credentials: false
-          sparse-checkout: |
-            scripts
       - id: id
         run: |
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
+          if [[ -f "${{runner.temp}}/$owner-$name-site.success" ]];
+          then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+      - id: checkout-this-here-repo-scripts
+        if: ${{ steps.id.outputs.success }}
+        uses: actions/checkout@v4
+        with:
+          repository: hubverse-org/hub-dashboard-control-room
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
       - uses: actions/create-github-app-token@v1
+        if: ${{ steps.id.outputs.success }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -94,6 +112,7 @@ jobs:
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: check-branch
+        if: ${{ steps.id.outputs.success }}
         env:
           GH_TOKEN: ${{ github.token }}
         name: "check for gh-pages branch and create if needed"
@@ -105,6 +124,7 @@ jobs:
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token }}"
       - id: checkout-pages
+        if: ${{ steps.id.outputs.success }}
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -113,10 +133,12 @@ jobs:
           path: 'pages'
           token: ${{ steps.token.outputs.token }}
       - id: fetch-artifact
+        if: ${{ steps.id.outputs.success }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
       - id: publish
+        if: ${{ steps.id.outputs.success }}
         run: |
           bash -x "${{ github.workspace }}/scripts/pushit.sh" \
             "gh-pages" \

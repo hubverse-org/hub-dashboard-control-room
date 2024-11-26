@@ -12,12 +12,6 @@ jobs:
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
-  echo:
-    name: "echo me"
-    needs: [repos]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ${{ needs.repos.outputs.repos }}
   site:
     needs: [repos]
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/build-site.yaml@main
