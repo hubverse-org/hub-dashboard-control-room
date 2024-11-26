@@ -78,8 +78,10 @@ def list_repositories():
     newbies = os.environ.get("NEW_REPOS")
     print(newbies)
     if newbies is not None and newbies not in set(["", "null", "false", " "]):
+        print("loading")
         repos = json.loads(newbies)
     else:
+        print("fetching")
         ghapp = get_app()
         repos = []
         for installation in ghapp["inst"]:
@@ -89,6 +91,7 @@ def list_repositories():
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
     ]
+    print(repos)
     for i in invalid:
         try:
             repos.remove(i)
