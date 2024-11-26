@@ -45,4 +45,14 @@ jobs:
           python getInstallations.py
       - id: list-repos
         run: |
-          echo "${{ steps.repos.outputs.repos }}"
+          {
+            echo "<<EOF"
+            echo '${{ steps.repos.outputs.repos }}'
+            echo "EOF"
+          } >> "repos"
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'repos'
+          path: 'repos'
