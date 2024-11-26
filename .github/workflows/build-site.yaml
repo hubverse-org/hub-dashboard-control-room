@@ -12,6 +12,11 @@ on:
       email:
         required: true
         type: string
+    secrets:
+      id:
+        required: true
+      key:
+        required: true
   repository_dispatch:
     types: ["site-build"]
 
@@ -34,8 +39,8 @@ jobs:
         name: "Generate App Token (if no token present)"
         id: token
         with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: id
