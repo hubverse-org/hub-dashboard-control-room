@@ -18,7 +18,6 @@ jobs:
       slug: ${{ steps.repos.outputs.slug }}
       id: ${{ steps.repos.outputs.id }}
       email: ${{ steps.repos.outputs.email }}
-      token: ${{ steps.token.outputs.token }}
     steps:
       - id: new-repos
         run: |
