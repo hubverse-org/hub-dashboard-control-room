@@ -78,8 +78,11 @@ def list_repositories():
     newbies = os.environ.get("NEW_REPOS")
     print(newbies)
     print(newbies == "")
-    print(newbies not in set(['""', "", "null", "false", " "]))
-    if newbies is not None and newbies not in set(["", "null", "false", " "]):
+    print(newbies == "null")
+    print(newbies == '"null"')
+    baddies = set(["", '""', '"null"', "null", "false", " "])
+    print(newbies not in baddies)
+    if newbies is not None and newbies not in baddies:
         print("loading")
         repos = json.loads(newbies)
     else:
