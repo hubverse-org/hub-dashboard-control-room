@@ -1,5 +1,6 @@
 name: "Build static site"
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       repos:
@@ -14,7 +15,6 @@ on:
     secrets:
       token:
         required: false
-  workflow_dispatch:
   repository_dispatch:
     types: ["site-build"]
 
