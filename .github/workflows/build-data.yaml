@@ -51,8 +51,8 @@ jobs:
       - uses: actions/create-github-app-token@v1
         id: token
         with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: checkout-config
