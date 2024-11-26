@@ -5,6 +5,7 @@ on:
     inputs:
       newbies:
         required: false
+        type: string
     secrets:
       id:
         required: true
