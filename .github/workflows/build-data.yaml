@@ -31,7 +31,7 @@ jobs:
     steps:
       - id: id
         run: |
-          if [[ "${{ matrix.site.build }}" ]]; then
+          if [[ -n "${{ matrix.site.build }}" ]]; then
             echo "build=${{ matrix.site.build }}" >> $GITHUB_OUTPUT
           else
             echo "build=both" >> $GITHUB_OUTPUT
@@ -89,13 +89,13 @@ jobs:
           path: 'repo'
       - id: build-targets
         name: "Generate target data"
-        if: ${{ steps.id.outputs.build == "both" || steps.id.outputs.build == "target" }}
+        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
         run: |
           ptc_generate_flusight_targets \
             repo \
             out/targets
       - id: json-lives
-        if: ${{ steps.id.outputs.build == "both" || steps.id.outputs.build == "forecast" }}
+        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
         name: "Generate forecast data"
         run: |
           ptc_generate_json_files \
