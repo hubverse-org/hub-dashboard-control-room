@@ -1,0 +1,27 @@
+name: "Build predtimechart dashboard (new)"
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: ["registration"]
+  schedule:
+    - cron: "17 19 * * *"
+
+jobs:
+  repos:
+    name: "Get list of dashboard repositories"
+    env:
+      APP_ID: ${{ vars.APP_ID }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.repos.outputs.repos }}
+      slug: ${{ steps.repos.outputs.slug }}
+      id: ${{ steps.repos.outputs.id }}
+      email: ${{ steps.repos.outputs.email }}
+    steps:
+      - id: repos
+        uses: ./.github/workflows/get-installations.yaml
+        with:
+          newbies: '${{ github.event.client_payload.newbies }}'
+      - run: |
+          echo '${{ steps.repos.outputs.repos }}'
