@@ -47,8 +47,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - id: checkout
         uses: actions/checkout@v4
-        repoistory: hubverse-org/hub-dashboard-control-room
         with:
+          repoistory: hubverse-org/hub-dashboard-control-room
           persist-credentials: false
           sparse-checkout: |
             requirements.txt

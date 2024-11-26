@@ -18,3 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo ${{ needs.repos.outputs.repos }}
+  site:
+    needs: [repos]
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/build-site.yaml@main
+    with:
+      repos: '${{ needs.repos.outputs.repos }}'
+      slug: '${{ needs.repos.outputs.slug }}'
+      email: '${{ needs.repos.outputs.email }}'
+    secrets:
+      id: ${{ vars.APP_ID }}
+      key: ${{ secrets.PRIVATE_KEY }}

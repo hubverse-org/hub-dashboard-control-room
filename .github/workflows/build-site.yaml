@@ -1,0 +1,125 @@
+name: "Build static site"
+on:
+  workflow_call:
+    inputs:
+      repos:
+        required: true
+        type: string
+      slug:
+        required: true
+        type: string
+      email:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: false
+  workflow_dispatch:
+  repository_dispatch:
+    types: ["site-build"]
+
+jobs:
+  build-site:
+    name: "Generate Static Site"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy: 
+      matrix: 
+        site: ${{ fromJSON(inputs.repos) }}
+    container:
+      image: ghcr.io/hubverse-org/hub-dash-site-builder:main
+      ports:
+        - 80
+      volumes:
+        - ${{ github.workspace }}:/site
+    steps:
+      - uses: actions/create-github-app-token@v1
+        name: "Generate App Token (if no token present)"
+        if: ${{ secrets.token == '' }}
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          owner: ${{ matrix.site.owner }}
+          repositories: ${{ matrix.site.name }}
+      - id: id
+        run: |
+          owner="${{ matrix.site.owner }}"
+          name="${{ matrix.site.name }}"
+          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
+      - id: checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token || secrets.token }}
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+      - id: build-site
+        run: bash -x /render.sh "${{ matrix.site.owner }}" "${{ matrix.site.name }}" ptc/data
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.id.outputs.file }}
+          path: '/site/pages/'
+          retention-days: 1
+  push-site:
+    name: "Push Static Site to gh-pages branch"
+    runs-on: ubuntu-latest
+    needs: [build-site]
+    continue-on-error: true
+    strategy:
+      matrix:
+        site: ${{ fromJSON(inputs.repos) }}
+    steps:
+      - id: checkout-this-here-repo-scripts
+        uses: actions/checkout@v4
+        with:
+          repoistory: hubverse-org/hub-dashboard-control-room
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+      - id: id
+        run: |
+          owner="${{ matrix.site.owner }}"
+          name="${{ matrix.site.name }}"
+          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
+      - uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          owner: ${{ matrix.site.owner }}
+          repositories: ${{ matrix.site.name }}
+      - id: check-branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        name: "check for gh-pages branch and create if needed"
+        run: | 
+          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+            "gh-pages" \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token }}"
+      - id: checkout-pages
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+          ref: gh-pages
+          path: 'pages'
+          token: ${{ steps.token.outputs.token }}
+      - id: fetch-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.id.outputs.file }}
+      - id: publish
+        run: |
+          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
+            "gh-pages" \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token }}"
