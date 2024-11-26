@@ -5,13 +5,18 @@ on:
     inputs:
       newbies:
         required: false
+    secrets:
+      id:
+        required: true
+      key:
+        required: true
 
 jobs:
   repos:
     name: "Get list of dashboard repositories"
     env:
-      APP_ID: ${{ vars.APP_ID }}
-      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      APP_ID: ${{ secrets.id }}
+      PRIVATE_KEY: ${{ secrets.key }}
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.repos.outputs.repos }}

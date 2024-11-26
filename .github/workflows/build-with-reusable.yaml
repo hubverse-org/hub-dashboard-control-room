@@ -3,25 +3,19 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: ["registration"]
-  schedule:
-    - cron: "17 19 * * *"
 
 jobs:
   repos:
     name: "Get list of dashboard repositories"
-    env:
-      APP_ID: ${{ vars.APP_ID }}
-      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
+    with:
+      newbies: '${{ github.event.client_payload.newbies }}'
+    secrets:
+      id: ${{ vars.APP_ID }}
+      key: ${{ secrets.PRIVATE_KEY }}
+  echo:
+    name: "echo me"
+    needs: [repos]
     runs-on: ubuntu-latest
-    outputs:
-      repos: ${{ steps.repos.outputs.repos }}
-      slug: ${{ steps.repos.outputs.slug }}
-      id: ${{ steps.repos.outputs.id }}
-      email: ${{ steps.repos.outputs.email }}
     steps:
-      - id: repos
-        uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
-        with:
-          newbies: '${{ github.event.client_payload.newbies }}'
-      - run: |
-          echo '${{ steps.repos.outputs.repos }}'
+      - run: echo ${{ needs.repos.outputs.repos }}
