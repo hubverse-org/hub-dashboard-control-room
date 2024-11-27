@@ -1,4 +1,4 @@
-name: "Build static site"
+name: "Generate Static Site"
 on:
   workflow_dispatch:
   workflow_call:
