@@ -63,6 +63,13 @@ jobs:
           sparse-checkout: |
             predtimechart-config.yml
             site-config.yml
+      - id: check-configs
+        name: "Check if we need to build data"
+        run: |
+          if [[ ! -f predtimechart-config.yml ]]; then
+            echo "::error title=Missing config::No `predtimechart-config.yml` file found. Exiting."
+            exit 1
+          fi
       - id: checkout-data
         uses: actions/checkout@v4
         with:
