@@ -2,7 +2,7 @@
 
 > [!NOTE]
 >
-> This project is a proof of concept. It may not work with all repositories.
+> This project is a proof of concept.
 
 This repository contains operational workflows for the [hubDashboard App](https://github.com/apps/hubDashboard).
 The workflow will generate predtimechart data and build a static site for each
