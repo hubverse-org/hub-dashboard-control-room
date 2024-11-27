@@ -55,9 +55,27 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
-      - id: build-site
+      - id: check-configs
+        name: "Check if we need to build site"
         run: |
-          bash -x /render.sh "${{ matrix.site.owner }}" "${{ matrix.site.name }}" ptc/data \
+          if [[ ! -f site-config.yml ]]; then
+            echo "::error title=Missing config::No `site-config.yml` file found. Exiting."
+            exit 1
+          fi
+          if [[ -f predtimechart-config.yml ]]; then
+            echo "forecasts=true" >> $GITHUB_OUTPUT
+          else
+            echo "forecasts=false" >> $GITHUB_OUTPUT
+          fi
+      - id: build-site
+        name: "Render Website"
+        run: |
+          bash -x /render.sh \
+            "${{ matrix.site.owner }}" \
+            "${{ matrix.site.name }}" \
+            "ptc/data" \
+            "" \
+            "${{ steps.check-configs.outputs.forecasts }}"
           && echo "success=true" >> $GITHUB_OUTPUT \
           || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
@@ -94,7 +112,6 @@ jobs:
             echo "success=false" >> $GITHUB_OUTPUT
           fi
       - id: checkout-this-here-repo-scripts
-        # if: ${{ steps.id.outputs.success == true }}
         uses: actions/checkout@v4
         with:
           repository: hubverse-org/hub-dashboard-control-room
@@ -102,7 +119,6 @@ jobs:
           sparse-checkout: |
             scripts
       - uses: actions/create-github-app-token@v1
-        # if: ${{ steps.id.outputs.success == true }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -110,7 +126,6 @@ jobs:
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: check-branch
-        # if: ${{ steps.id.outputs.success == true }}
         env:
           GH_TOKEN: ${{ github.token }}
         name: "check for gh-pages branch and create if needed"
@@ -122,7 +137,6 @@ jobs:
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token }}"
       - id: checkout-pages
-        # if: ${{ steps.id.outputs.success == true }}
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -131,12 +145,10 @@ jobs:
           path: 'pages'
           token: ${{ steps.token.outputs.token }}
       - id: fetch-artifact
-        # if: ${{ steps.id.outputs.success == true }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
       - id: publish
-        # if: ${{ steps.id.outputs.success == true }}
         run: |
           bash -x "${{ github.workspace }}/scripts/pushit.sh" \
             "gh-pages" \
