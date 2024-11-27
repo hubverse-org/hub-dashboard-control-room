@@ -70,12 +70,12 @@ jobs:
       - id: build-site
         name: "Render Website"
         run: |
-          bash -x /render.sh \
+          bash /render.sh \
             "${{ matrix.site.owner }}" \
             "${{ matrix.site.name }}" \
             "ptc/data" \
             "" \
-            "${{ steps.check-configs.outputs.forecasts }}"
+            "${{ steps.check-configs.outputs.forecasts }}" \
           && echo "success=true" >> $GITHUB_OUTPUT \
           || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
