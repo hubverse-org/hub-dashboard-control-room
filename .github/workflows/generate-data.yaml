@@ -1,6 +1,5 @@
 name: "Generate Target and Forecast Data"
 on:
-  workflow_dispatch:
   workflow_call:
     inputs:
       repos:

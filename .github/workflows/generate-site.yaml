@@ -1,6 +1,5 @@
 name: "Generate Static Site"
 on:
-  workflow_dispatch:
   workflow_call:
     inputs:
       repos:
