@@ -44,12 +44,14 @@ jobs:
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: id
+        name: "setup run variables"
         run: |
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
       - id: checkout
+        name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token }}
@@ -101,6 +103,7 @@ jobs:
         site: ${{ fromJSON(inputs.repos) }}
     steps:
       - id: id
+        name: "setup run variables"
         run: |
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
@@ -113,6 +116,7 @@ jobs:
             echo "success=false" >> $GITHUB_OUTPUT
           fi
       - id: checkout-this-here-repo-scripts
+        name: "Fetch deployment scripts"
         uses: actions/checkout@v4
         with:
           repository: hubverse-org/hub-dashboard-control-room
@@ -127,9 +131,9 @@ jobs:
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: check-branch
+        name: "check for gh-pages branch and create if needed"
         env:
           GH_TOKEN: ${{ github.token }}
-        name: "check for gh-pages branch and create if needed"
         run: | 
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "gh-pages" \
@@ -138,6 +142,7 @@ jobs:
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token }}"
       - id: checkout-pages
+        name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -146,10 +151,12 @@ jobs:
           path: 'pages'
           token: ${{ steps.token.outputs.token }}
       - id: fetch-artifact
+        name: "Load changes"
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
       - id: publish
+        name: "Publish site"
         run: |
           bash -x "${{ github.workspace }}/scripts/pushit.sh" \
             "gh-pages" \

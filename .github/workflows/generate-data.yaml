@@ -28,6 +28,7 @@ jobs:
         site: ${{ fromJSON(inputs.repos) }}
     steps:
       - id: id
+        name: "setup run variables"
         run: |
           if [[ -n "${{ matrix.site.build }}" ]]; then
             echo "build=${{ matrix.site.build }}" >> $GITHUB_OUTPUT
@@ -43,6 +44,7 @@ jobs:
         with:
           python-version: 3.12
       - id: install-predtimechart-tool
+        name: "Install predtimechart conversion tool"
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart@znk/skip-existing/32
@@ -54,6 +56,7 @@ jobs:
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
       - id: checkout-config
+        name: "Fetch config files"
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -72,6 +75,7 @@ jobs:
             exit 1
           fi
       - id: checkout-data
+        name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token }}
@@ -80,7 +84,7 @@ jobs:
           ref: 'ptc/data'
           path: 'out'
       - id: get-repo-name
-        name: "Set up run"
+        name: "Get information about hub"
         run: |
           mkdir -p out/targets/
           mkdir -p out/forecasts/
@@ -88,6 +92,7 @@ jobs:
           | sed -E -e 's+(https://github.com/|^)+repo=+' \
           | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: clone-repo
+        name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
         uses: actions/checkout@v4
         with:
           persist-credentials: false
