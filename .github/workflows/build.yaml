@@ -2,7 +2,9 @@ name: "Build predtimechart dashboard"
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: ["registration"]
+    types:
+      - "registration"
+      - "all"
   schedule:
     - cron: "17 19 * * *"
 

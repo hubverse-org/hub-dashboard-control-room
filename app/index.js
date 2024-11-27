@@ -41,6 +41,11 @@ module.exports = (app) => {
     app.log(`A new repository was removed ${client_payload.newbies}`);
   });
   app.on(["issue_comment.created", "issue_comment.edited"], async (context) => {
+    const is_bot = context.payload.comment.user.login == "hubdashboard[bot]"
+    if (is_bot) {
+      app.log("I commented! I'm helping!")
+      return(null)
+    }
     const allowed_to_comment =
       "COLLABORATOR, CONTRIBUTOR, MEMBER, OWNER".includes(
         context.payload.comment.author_association
@@ -65,11 +70,45 @@ module.exports = (app) => {
       new: true,
       message: "Comment",
     };
-    const result = await send_dispatch(client_payload, action);
-    app.log(
-      `Ran hub build ${action} for ${client_payload.newbies.owner}/${client_payload.newbies.name}`
-    );
-    return result;
+    var body;
+    switch (action) {
+      case "all":
+        body = "The site and data should be updated in a few minutes.";
+        break;
+      case "site":
+        body = "The site should be updated in a minute or two.";
+        break;
+      case "forecasts":
+      case "data":
+        body =
+          "The data should be updated in a few minutes (actual duration depends on the size of the hub)";
+        break;
+      case "targets":
+        body = "The target data should be updated in a minute or two";
+        break;
+      default:
+        body = `
+I could not understand the command ${action}.
+
+You can use one of the following commands for your site:
+
+- \`site\` (rebuilds the website only)
+- \`data\` (updates the underlying data for the predtimechart vis)
+- \`targets\` (updates the targets data)
+- \`forecasts\` (updates the forecasts data)
+- \`all\` (rebuilds everything)
+
+e.g. running \`/hub build site\` will rebuild your site`;
+    }
+    const params = context.issue({ body: body });
+    if (!body.includes("could not understand")) {
+      const result = await send_dispatch(client_payload, action);
+      app.log(
+        `Ran hub build ${action} for ${client_payload.newbies.owner}/${client_payload.newbies.name}`
+      );
+    }
+    // Post a comment on the issue
+    return context.octokit.issues.createComment(params);
   });
   // 2024-11-14
   // I have determined that the token created for any given webhook event is
@@ -131,4 +170,5 @@ module.exports = (app) => {
     return result;
   });
 };
+
 
