@@ -1,32 +1,20 @@
-name: "Build predtimechart dashboard"
+name: "Rebuild Site"
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: ["registration"]
-  schedule:
-    - cron: "17 19 * * *"
+    types: ["site"]
 
 jobs:
   repos:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
-      newbies: ${{ toJSON(github.event.client_payload.newbies) }}
+      newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@main
-    with:
-      repos: '${{ needs.repos.outputs.repos }}'
-      slug: '${{ needs.repos.outputs.slug }}'
-      email: '${{ needs.repos.outputs.email }}'
-    secrets:
-      id: ${{ vars.APP_ID }}
-      key: ${{ secrets.PRIVATE_KEY }}
-  data:
-    needs: [repos]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
     with:
       repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'

@@ -1,8 +1,11 @@
-name: "Generate Sites"
+name: "Rebuild Data"
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: ["site"]
+    types:
+      - "data"
+      - "targets"
+      - "forecasts"
 
 jobs:
   repos:
@@ -14,7 +17,7 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/build-site.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
     with:
       repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'

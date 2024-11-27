@@ -17,8 +17,6 @@ on:
         required: true
       key:
         required: true
-  repository_dispatch:
-    types: ["site-build"]
 
 jobs:
   build-site:
