@@ -57,6 +57,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
       - id: check-configs
         name: "Check if we need to build site"
+        shell: "bash"
         run: |
           if [[ ! -f site-config.yml ]]; then
             echo "::error title=Missing config::No `site-config.yml` file found. Exiting."
