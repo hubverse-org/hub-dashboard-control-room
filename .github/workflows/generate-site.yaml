@@ -68,10 +68,10 @@ jobs:
           name: ${{ steps.id.outputs.file }}
           path: '/site/pages/'
           retention-days: 1
-      - name: signal success
-        # if: ${{ steps.build-site.outputs.success == true }}
-        run: |
-          touch "${{runner.temp}}/${{steps.id.outputs.file}}.success" 
+      # - name: signal success
+      #   # if: ${{ steps.build-site.outputs.success == true }}
+      #   run: |
+      #     touch "${{runner.temp}}/${{steps.id.outputs.file}}.success" 
   push-site:
     name: "Push Site"
     runs-on: ubuntu-latest
