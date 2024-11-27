@@ -61,7 +61,7 @@ jobs:
         shell: "bash"
         run: |
           if [[ ! -f site-config.yml ]]; then
-            echo "::error title=Missing config::No `site-config.yml` file found. Exiting."
+            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No site-config.yml file found. Exiting."
             exit 1
           fi
           if [[ -f predtimechart-config.yml ]]; then

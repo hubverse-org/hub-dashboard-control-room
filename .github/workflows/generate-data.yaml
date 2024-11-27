@@ -70,7 +70,7 @@ jobs:
         shell: "bash"
         run: |
           if [[ ! -f predtimechart-config.yml ]]; then
-            echo "::error title=Missing config::No `predtimechart-config.yml` file found. Exiting."
+            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predtimechart-config.yml file found. Exiting."
             exit 1
           fi
       - id: checkout-data
