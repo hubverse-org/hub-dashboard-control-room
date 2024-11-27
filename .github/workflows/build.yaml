@@ -10,7 +10,7 @@ jobs:
   repos:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
-      newbies: ${{ github.event.client_payload.newbies }}
+      newbies: ${{ toJSON(github.event.client_payload.newbies) }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
