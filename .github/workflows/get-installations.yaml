@@ -42,7 +42,7 @@ jobs:
         run: |
           {
             echo "new<<EOF"
-            echo '${{ toJSON(inputs.newbies) }}'
+            echo '${{ inputs.newbies }}'
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - id: checkout
