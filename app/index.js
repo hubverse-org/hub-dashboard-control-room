@@ -55,7 +55,8 @@ module.exports = (app) => {
       return 200;
     }
     const the_floor = context.payload.comment.body;
-    if (!the_floor.includes("/hub build")) {
+    const ignore = !the_floor.includes("/hub ")
+    if (ignore) {
       return 200;
     }
 
@@ -85,6 +86,8 @@ module.exports = (app) => {
         body =
           "The data should be updated in a few minutes (actual duration depends on the size of the hub)";
         break;
+      case "regenerate forecasts":
+      case "regenerate data":
       case "rebuild forecasts":
       case "rebuild data":
         body =
@@ -96,7 +99,7 @@ module.exports = (app) => {
         break;
       default:
         body = `
-I could not understand the command ${action}.
+I could not understand the command \`/hub ${action}\`.
 
 You can use one of the following commands for your site:
 
@@ -110,9 +113,8 @@ e.g. running \`/hub build site\` will build your site.
 
 > [!NOTE]
 > Only the newest forecast data are rebuilt. If you need to rebuild all of your
-> forecast data (e.g. model data from a previous round was updated), you can 
-> use the **\`rebuild\`** keyword (e.g. \`hub rebuild data\` or 
-> \`hub rebuild forecasts\`)`;
+> forecast data (e.g. model data from a previous round was updated), you can
+> use the **\`rebuild\`** keyword (e.g. \`/hub rebuild data\` or \`/hub rebuild forecasts\`)`;
     }
     const params = context.issue({ body: body });
     if (!body.includes("could not understand")) {
@@ -186,5 +188,6 @@ e.g. running \`/hub build site\` will build your site.
     return result;
   });
 };
+
 
 
