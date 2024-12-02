@@ -36,6 +36,7 @@ module.exports = (app) => {
     const client_payload = {
       newbies: context.payload.repositories_removed.map((r) => r.full_name),
       new: true,
+      regenerate: false,
       message: "Bad Repository!",
     };
     app.log(`A new repository was removed ${client_payload.newbies}`);
@@ -150,6 +151,7 @@ e.g. running \`/hub build site\` will build your site.
     const client_payload = {
       newbies: [{ owner: owner, name: repo }],
       new: true,
+      regenerate: false,
       message: "Update",
     };
     const result = await send_dispatch(client_payload, "site");
@@ -171,6 +173,7 @@ e.g. running \`/hub build site\` will build your site.
         return { owner: owner, name: r.name };
       }),
       new: true,
+      regenerate: false,
       message: "New Repository!",
     };
 
