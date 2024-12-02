@@ -14,7 +14,7 @@ on:
       regenerate:
         default: false
         required: false
-        type: bool
+        type: boolean
     secrets:
       id:
         required: true
