@@ -116,9 +116,9 @@ e.g. running \`/hub build site\` will build your site.
     }
     const params = context.issue({ body: body });
     if (!body.includes("could not understand")) {
-      const result = await send_dispatch(client_payload, action);
+      const result = await send_dispatch(client_payload, action.split(" ")[1]);
       app.log(
-        `Ran hub build ${action} for ${client_payload.newbies.owner}/${client_payload.newbies.name}`
+        `Ran hub ${action} for ${client_payload.newbies.owner}/${client_payload.newbies.name}`
       );
     }
     // Post a comment on the issue
