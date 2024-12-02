@@ -113,16 +113,19 @@ jobs:
         name: "Generate forecast data"
         run: |
           if [[ ${{ inputs.regenerate }} == 'true' ]]; then
-            regen="--regenerate"
+            ptc_generate_json_files \
+              repo \
+              predtimechart-config.yml \
+              out/predtimechart-options.json \
+              out/forecasts \
+              --regenerate
           else
-            regen=""
+            ptc_generate_json_files \
+              repo \
+              predtimechart-config.yml \
+              out/predtimechart-options.json \
+              out/forecasts
           fi
-          ptc_generate_json_files \
-            repo \
-            predtimechart-config.yml \
-            out/predtimechart-options.json \
-            out/forecasts \
-            "${regen}"
       - name: Upload artifact
         id: upload
         uses: actions/upload-artifact@v4
