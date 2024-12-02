@@ -59,7 +59,7 @@ module.exports = (app) => {
     }
 
     const action = the_floor
-      .split("/hub build")[1]
+      .split("/hub ")[1]
       .split("\n")[0]
       .trim()
       .toLowerCase();
@@ -68,22 +68,29 @@ module.exports = (app) => {
     const client_payload = {
       newbies: [{ owner: owner, name: repo }],
       new: true,
+      regenerate: false,
       message: "Comment",
     };
     var body;
     switch (action) {
-      case "all":
+      case "build all":
         body = "The site and data should be updated in a few minutes.";
         break;
-      case "site":
+      case "build site":
         body = "The site should be updated in a minute or two.";
         break;
-      case "forecasts":
-      case "data":
+      case "build forecasts":
+      case "build data":
         body =
           "The data should be updated in a few minutes (actual duration depends on the size of the hub)";
         break;
-      case "targets":
+      case "rebuild forecasts":
+      case "rebuild data":
+        body =
+          "The data should be updated in a few minutes (actual duration depends on the size of the hub)";
+        client_payload.regenerate = true
+        break;
+      case "build targets":
         body = "The target data should be updated in a minute or two";
         break;
       default:
@@ -98,7 +105,13 @@ You can use one of the following commands for your site:
 - \`forecasts\` (updates the forecasts data)
 - \`all\` (rebuilds everything)
 
-e.g. running \`/hub build site\` will rebuild your site`;
+e.g. running \`/hub build site\` will build your site.
+
+> [!NOTE]
+> Only the newest forecast data are rebuilt. If you need to rebuild all of your
+> forecast data (e.g. model data from a previous round was updated), you can 
+> use the **\`rebuild\`** keyword (e.g. \`hub rebuild data\` or 
+> \`hub rebuild forecasts\`)`;
     }
     const params = context.issue({ body: body });
     if (!body.includes("could not understand")) {

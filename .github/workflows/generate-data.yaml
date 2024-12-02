@@ -11,6 +11,10 @@ on:
       email:
         required: true
         type: string
+      regenerate:
+        default: false
+        required: false
+        type: bool
     secrets:
       id:
         required: true
@@ -108,11 +112,17 @@ jobs:
         if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
         name: "Generate forecast data"
         run: |
+          if [[ ${{ inputs.regenerate }} == 'true' ]]; then
+            regen="--regenerate"
+          else
+            regen=""
+          fi
           ptc_generate_json_files \
             repo \
             predtimechart-config.yml \
             out/predtimechart-options.json \
-            out/forecasts
+            out/forecasts \
+            "${regen}"
       - name: Upload artifact
         id: upload
         uses: actions/upload-artifact@v4
