@@ -105,8 +105,9 @@ jobs:
         name: "Generate target data"
         if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
         run: |
-          ptc_generate_flusight_targets \
+          ptc_generate_target_json_files \
             repo \
+            predtimechart-config.yml \
             out/targets
       - id: json-lives
         if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
