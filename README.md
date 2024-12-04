@@ -61,7 +61,7 @@ receive messages (webhooks) and send messages (API requests). Just like a
 mailbox, you cannot just stick one in a random place an assume that you can
 start receiving messages---you have to give it an address (a webserver).
 
-In our case, we have [hubDashboard (GitHub app)](https://github.com/apps/hubDashboard) which is running on [glitch (webserver)](https://glitch.com/~crystal-glimmer-path). The scripts for this app live in [`app/index.js`](app/index.html).
+In our case, we have [hubDashboard (GitHub app)](https://github.com/apps/hubDashboard) which is running on [glitch (webserver)](https://glitch.com/~crystal-glimmer-path). The scripts for this app live in [`app/index.js`](app/index.js).
 
 When the app is installed on a repository, GitHub knows that it has to send
 [webhook events related to installations, issue comments, and pushes](https://docs.github.com/en/webhooks/webhook-events-and-payloads) to the
