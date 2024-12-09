@@ -21,7 +21,7 @@ def check_credentials():
 def get_hub(repo):
     try:
         cfg = repo.get_contents('site-config.yml').decoded_contents
-    except UnknownObjectException:
+    except github.GithubException.UnknownObjectException:
         print(f"{owner}/{repo} does not appear to be a dashboard repository.")
         print("Exiting.")
         return None
@@ -37,7 +37,7 @@ def get_tasks(hub, g):
     repo = g.get_repo(hub)
     try:
         tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
-    except UnknownObjectException:
+    except github.GithubException.UnknownObjectException:
         print(f"Could not find any tasks in {hub}.")
         print("Exiting.")
         return None
@@ -170,7 +170,7 @@ def list_repositories():
         g = api_access()
         for installation in ghapp["inst"]:
             # get the full names for the repositories
-            repos += [include_if_round_is_closed(x, g) for x in installation.get_repos()]
+            repos += [include_if_round_is_closed(x) for x in installation.get_repos()]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
