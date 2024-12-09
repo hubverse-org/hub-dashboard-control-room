@@ -170,7 +170,7 @@ def list_repositories():
         g = api_access()
         for installation in ghapp["inst"]:
             # get the full names for the repositories
-            repos += [include_if_round_is_closed(x) for x in installation.get_repos()]
+            repos += [include_if_round_is_closed(x, g) for x in installation.get_repos()]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
