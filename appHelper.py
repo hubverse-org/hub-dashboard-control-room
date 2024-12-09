@@ -81,7 +81,7 @@ def get_closest_date(dates, today):
 def round_closed_yesterday(tasks):
     if tasks is None:
         return False
-    sub_range = get_submission_range(tasks)
+    sub_range = get_submissions_range(tasks)
     date.today() == max(sub_range) + 1
 
 def include_if_round_is_closed(repo, g):
