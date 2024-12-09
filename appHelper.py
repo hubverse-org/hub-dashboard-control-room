@@ -22,7 +22,7 @@ def check_credentials():
 
 def get_hub(repo):
     try:
-        cfg = repo.get_contents('site-config.yml').decoded_contents
+        cfg = repo.get_contents('site-config.yml').decoded_content
     except UnknownObjectException:
         print(f"Skipping '{repo.full_name}', which does not appear to be a dashboard repository.")
         return None
@@ -39,7 +39,7 @@ def get_tasks(hub, g):
         return None
     repo = g.get_repo(hub)
     try:
-        tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
+        tasks = repo.get_contents("hub-config/tasks.json").decoded_content
     except UnknownObjectException:
         print(f"Could not find any tasks in {hub}.")
         print("Exiting.")
