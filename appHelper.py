@@ -21,7 +21,7 @@ def check_credentials():
 def get_hub(repo):
     try:
         cfg = repo.get_contents('site-config.yml').decoded_contents
-    except github.GithubException.UnknownObjectException:
+    except GithubException.UnknownObjectException:
         print(f"{owner}/{repo} does not appear to be a dashboard repository.")
         print("Exiting.")
         return None
@@ -37,7 +37,7 @@ def get_tasks(hub, g):
     repo = g.get_repo(hub)
     try:
         tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
-    except github.GithubException.UnknownObjectException:
+    except GithubException.UnknownObjectException:
         print(f"Could not find any tasks in {hub}.")
         print("Exiting.")
         return None
