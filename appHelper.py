@@ -167,6 +167,7 @@ def list_repositories():
         print("fetching repositories")
         ghapp = get_app()
         repos = []
+        g = api_access()
         for installation in ghapp["inst"]:
             # get the full names for the repositories
             repos += [include_if_round_is_closed(x) for x in installation.get_repos()]
