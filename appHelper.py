@@ -24,7 +24,7 @@ def get_hub(repo):
     try:
         cfg = repo.get_contents('site-config.yml').decoded_contents
     except UnknownObjectException:
-        print(f"{owner}/{repo} does not appear to be a dashboard repository.")
+        print(f"{repo.full_name} does not appear to be a dashboard repository.")
         print("Exiting.")
         return None
     return os.path.normpath(yaml.load(cfg, yaml.Loader).get("hub"))
@@ -39,7 +39,7 @@ def get_tasks(hub, g):
     repo = g.get_repo(hub)
     try:
         tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
-    except GithubException.UnknownObjectException:
+    except UnknownObjectException:
         print(f"Could not find any tasks in {hub}.")
         print("Exiting.")
         return None
