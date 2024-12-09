@@ -32,7 +32,7 @@ def api_access(token = None):
     if token is None:
         token = os.environ.get("GITHUB_TOKEN")
     auth = Auth.Token(token)
-    g = Github(auth = auth)
+    return Github(auth = auth)
 
 def get_tasks(hub, g):
     if hub is None:
