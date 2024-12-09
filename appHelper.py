@@ -72,11 +72,11 @@ def get_submissions_range(tasks):
 def get_closest_date(dates, today):
     the_date = None
     last_date = None
-    for date in dates:
-        if date.fromisodateformat(date) > today:
+    for maybe in dates:
+        if date.fromisodateformat(maybe) > today:
             the_date = last_date
             break
-        last_date = date
+        last_date = maybe
     return date.fromisodateformat(the_date)
 
 def round_closed_yesterday(tasks):
