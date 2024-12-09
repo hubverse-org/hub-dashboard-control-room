@@ -61,7 +61,7 @@ def get_submissions_range(tasks):
 
     # when there is one required submission date
     if dates["required"] is not None and len(dates["required"]) == 1:
-        the_date = date.fromisoformat(dates["required"])
+        the_date = date.fromisoformat(dates["required"][0])
     else:
         today = date.today()
         the_date = get_closest_date(dates["optional"], today)
