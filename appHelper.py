@@ -53,15 +53,15 @@ def get_submissions_range(tasks):
     start = subs.get("start")
     end = subs.get("end")
     if relative is None:
-        start = date.fromisodateformat(start)
-        end = date.fromisodateformat(end) - start
+        start = date.fromisoformat(start)
+        end = date.fromisoformat(end) - start
         return [start + x for x in range(end.days)]
 
     dates = tasks.get("rounds")[0].get("model_tasks")[0].get("task_ids").get(relative)
 
     # when there is one required submission date
     if dates["required"] is not None and len(dates["required"]) == 1:
-        the_date = date.fromisodateformat(dates["required"])
+        the_date = date.fromisoformat(dates["required"])
     else:
         today = date.today()
         the_date = get_closest_date(dates["optional"], today)
@@ -73,11 +73,11 @@ def get_closest_date(dates, today):
     the_date = None
     last_date = None
     for maybe in dates:
-        if date.fromisodateformat(maybe) > today:
+        if date.fromisoformat(maybe) > today:
             the_date = last_date
             break
         last_date = maybe
-    return date.fromisodateformat(the_date)
+    return date.fromisoformat(the_date)
 
 def round_closed_yesterday(tasks):
     if tasks is None:
