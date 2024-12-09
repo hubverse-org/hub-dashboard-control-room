@@ -24,8 +24,7 @@ def get_hub(repo):
     try:
         cfg = repo.get_contents('site-config.yml').decoded_contents
     except UnknownObjectException:
-        print(f"{repo.full_name} does not appear to be a dashboard repository.")
-        print("Exiting.")
+        print(f"Skipping '{repo.full_name}', which does not appear to be a dashboard repository.")
         return None
     return os.path.normpath(yaml.load(cfg, yaml.Loader).get("hub"))
 
@@ -36,6 +35,8 @@ def api_access(token = None):
     g = Github(auth = auth)
 
 def get_tasks(hub, g):
+    if hub is None:
+        return None
     repo = g.get_repo(hub)
     try:
         tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
@@ -78,6 +79,8 @@ def get_closest_date(dates, today):
     return the_date
 
 def round_closed_yesterday(tasks):
+    if tasks is None:
+        return False
     sub_range = get_submission_range(tasks)
     date.today() == max(sub_range) + 1
 
