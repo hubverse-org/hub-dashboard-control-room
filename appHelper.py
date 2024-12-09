@@ -73,11 +73,11 @@ def get_closest_date(dates, today):
     the_date = None
     last_date = None
     for date in dates:
-        if date > today:
+        if date.fromisodateformat(date) > today:
             the_date = last_date
             break
         last_date = date
-    return the_date
+    return date.fromisodateformat(the_date)
 
 def round_closed_yesterday(tasks):
     if tasks is None:
