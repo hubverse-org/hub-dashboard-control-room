@@ -27,7 +27,7 @@ def get_hub(repo):
         return None
     return os.path.normpath(yaml.load(cfg, yaml.Loader).get("hub"))
 
-def api_access(token):
+def api_access(token = None):
     if token is None:
         token = os.environ.get("GITHUB_TOKEN")
     auth = Auth.Token(token)
