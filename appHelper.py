@@ -11,6 +11,7 @@ from github import Auth
 from github import Github
 from github import GithubIntegration
 from github import GithubException
+from github import UnknownObjectException
 
 def check_credentials():
     pemf = os.environ.get("PRIVATE_KEY")
@@ -22,7 +23,7 @@ def check_credentials():
 def get_hub(repo):
     try:
         cfg = repo.get_contents('site-config.yml').decoded_contents
-    except GithubException.UnknownObjectException:
+    except UnknownObjectException:
         print(f"{owner}/{repo} does not appear to be a dashboard repository.")
         print("Exiting.")
         return None
