@@ -37,6 +37,7 @@ def api_access(token = None):
 def get_tasks(hub, g):
     if hub is None:
         return None
+    print(f"Fetching tasks for {hub}")
     repo = g.get_repo(hub)
     try:
         tasks = repo.get_contents("hub-config/tasks.json").decoded_content
@@ -85,6 +86,7 @@ def round_closed_yesterday(tasks):
     date.today() == max(sub_range) + 1
 
 def include_if_round_is_closed(repo, g):
+    print(f"Processing {repo.full_name}")
     hub = get_hub(repo)
     tasks = get_tasks(hub, g)
     # if the round closed yesterday, then we can build the dashboard
