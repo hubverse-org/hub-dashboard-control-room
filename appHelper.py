@@ -2,12 +2,95 @@
 
 import os
 import json
+import yaml
 import string
 import random
+from datetime import date, timedelta
 # https://pygithub.readthedocs.io/
 from github import Auth
 from github import Github
 from github import GithubIntegration
+
+def check_credentials():
+    pemf = os.environ.get("PRIVATE_KEY")
+    id = os.environ.get("APP_ID")
+    valid = pemf is not None and id is not None
+    # TODO: add informative message here
+    return valid
+
+def get_hub(repo):
+    try:
+        cfg = repo.get_contents('site-config.yml').decoded_contents
+    except UnknownObjectException:
+        print(f"{owner}/{repo} does not appear to be a dashboard repository.")
+        print("Exiting.")
+        return None
+    return os.path.normpath(yaml.load(cfg, yaml.Loader).get("hub"))
+
+def api_access(token):
+    if token is None:
+        token = os.environ.get("GITHUB_TOKEN")
+    auth = Auth.Token(token)
+    g = Github(auth = auth)
+
+def get_tasks(hub, g):
+    repo = g.get_repo(hub)
+    try:
+        tasks = repo.get_contents("hub-config/tasks.json").decoded_contents
+    except UnknownObjectException:
+        print(f"Could not find any tasks in {hub}.")
+        print("Exiting.")
+        return None
+    return(json.loads(tasks))
+
+def get_submissions_range(tasks):
+    subs = tasks.get("submissions_due")
+    relative = subs.get("relative_to")
+    start = subs.get("start")
+    end = subs.get("end")
+    if relative is None:
+        start = date.fromisodateformat(start)
+        end = date.fromisodateformat(end) - start
+        return [start + x for x in range(end.days)]
+
+    dates = tasks.get("rounds")[0].get("model_tasks")[0].get("task_ids").get(relative)
+
+    # when there is one required submission date
+    if dates["required"] is not None and len(dates["required"]) == 1:
+        the_date = date.fromisodateformat(dates["required"])
+    else:
+        today = date.today()
+        the_date = get_closest_date(dates["optional"], today)
+
+    # when it gets to here, start and end are relative
+    return [the_date + timedelta(days = x) for x in range(start, end + 1)]
+
+def get_closest_date(dates, today):
+    the_date = None
+    last_date = None
+    for date in dates:
+        if date > today:
+            the_date = last_date
+            break
+        last_date = date
+    return the_date
+
+def round_closed_yesterday(tasks):
+    sub_range = get_submission_range(tasks)
+    date.today() == max(sub_range) + 1
+
+def include_if_round_is_closed(repo, g):
+    hub = get_hub(repo)
+    tasks = get_tasks(hub, g)
+    # if the round closed yesterday, then we can build the dashboard
+    if round_closed_yesterday(tasks):
+        return [{"owner": repo.owner.login, "name": repo.name}]
+    else:
+        return []
+
+
+
+
 
 # generate a random ID to assing the variable
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -86,7 +169,7 @@ def list_repositories():
         repos = []
         for installation in ghapp["inst"]:
             # get the full names for the repositories
-            repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos()]
+            repos += [include_if_round_is_closed(x) for x in installation.get_repos()]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
