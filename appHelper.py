@@ -48,7 +48,7 @@ def get_tasks(hub, g):
     return(json.loads(tasks))
 
 def get_submissions_range(tasks):
-    subs = tasks.get("submissions_due")
+    subs = tasks.get("rounds")[0].get("submissions_due")
     relative = subs.get("relative_to")
     start = subs.get("start")
     end = subs.get("end")
