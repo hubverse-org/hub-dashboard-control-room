@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from github import Auth
 from github import Github
 from github import GithubIntegration
+from github import GithubException
 
 def check_credentials():
     pemf = os.environ.get("PRIVATE_KEY")
