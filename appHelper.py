@@ -69,6 +69,7 @@ def get_submissions_range(tasks):
     # when it gets to here, start and end are relative
     return [the_date + timedelta(days = x) for x in range(start, end + 1)]
 
+# TODO: figure out the correct date to cutoff
 def get_closest_date(dates, today):
     the_date = None
     last_date = None
