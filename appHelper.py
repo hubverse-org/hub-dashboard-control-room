@@ -83,7 +83,13 @@ def round_closed_yesterday(tasks):
     if tasks is None:
         return False
     sub_range = get_submissions_range(tasks)
-    date.today() == max(sub_range) + timedelta(days = 1)
+    is_today_the_day = date.today() == max(sub_range) + timedelta(days = 1)
+    if is_today_the_day:
+        print(f"Round closed yesterday: {max(sub_range)}")
+    else:
+        print(f"Round closes on {max(sub_range)}")
+
+    return is_today_the_day
 
 def include_if_round_is_closed(repo, g):
     print(f"Processing {repo.full_name}")
