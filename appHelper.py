@@ -188,7 +188,7 @@ def list_repositories():
         except ValueError:
             pass
 
-    write_json("repos", [x if x is not None for x in repos])
+    write_json("repos", [x if x in repos if x is not None])
 
 def get_token():
     ghapp = get_app()
