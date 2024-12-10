@@ -91,9 +91,9 @@ def include_if_round_is_closed(repo, g):
     tasks = get_tasks(hub, g)
     # if the round closed yesterday, then we can build the dashboard
     if round_closed_yesterday(tasks):
-        return [{"owner": repo.owner.login, "name": repo.name}]
+        return {"owner": repo.owner.login, "name": repo.name}
     else:
-        return []
+        return None
 
 
 
@@ -188,7 +188,7 @@ def list_repositories():
         except ValueError:
             pass
 
-    write_json("repos", repos)
+    write_json("repos", [x if x is not None for x in repos])
 
 def get_token():
     ghapp = get_app()
