@@ -2,12 +2,109 @@
 
 import os
 import json
+import yaml
 import string
 import random
+from datetime import date, timedelta
 # https://pygithub.readthedocs.io/
 from github import Auth
 from github import Github
 from github import GithubIntegration
+from github import GithubException
+from github import UnknownObjectException
+
+def check_credentials():
+    pemf = os.environ.get("PRIVATE_KEY")
+    id = os.environ.get("APP_ID")
+    valid = pemf is not None and id is not None
+    # TODO: add informative message here
+    return valid
+
+def get_hub(repo):
+    try:
+        cfg = repo.get_contents('site-config.yml').decoded_content
+    except UnknownObjectException:
+        print(f"Skipping '{repo.full_name}', which does not appear to be a dashboard repository.")
+        return None
+    return os.path.normpath(yaml.load(cfg, yaml.Loader).get("hub"))
+
+def api_access(token = None):
+    if token is None:
+        token = os.environ.get("GITHUB_TOKEN")
+    auth = Auth.Token(token)
+    return Github(auth = auth)
+
+def get_tasks(hub, g):
+    if hub is None:
+        return None
+    print(f"Fetching tasks for {hub}")
+    repo = g.get_repo(hub)
+    try:
+        tasks = repo.get_contents("hub-config/tasks.json").decoded_content
+    except UnknownObjectException:
+        print(f"Could not find any tasks in {hub}.")
+        print("Exiting.")
+        return None
+    return(json.loads(tasks))
+
+def get_submissions_range(tasks):
+    subs = tasks.get("rounds")[0].get("submissions_due")
+    relative = subs.get("relative_to")
+    start = subs.get("start")
+    end = subs.get("end")
+    if relative is None:
+        start = date.fromisoformat(start)
+        end = date.fromisoformat(end) - start
+        return [start + x for x in range(end.days)]
+
+    dates = tasks.get("rounds")[0].get("model_tasks")[0].get("task_ids").get(relative)
+
+    # when there is one required submission date
+    if dates["required"] is not None and len(dates["required"]) == 1:
+        the_date = date.fromisoformat(dates["required"][0])
+    else:
+        today = date.today()
+        the_date = get_closest_date(dates["optional"], today)
+
+    # when it gets to here, start and end are relative
+    return [the_date + timedelta(days = x) for x in range(start, end + 1)]
+
+# TODO: figure out the correct date to cutoff
+def get_closest_date(dates, today):
+    the_date = None
+    last_date = None
+    for maybe in dates:
+        if date.fromisoformat(maybe) > today:
+            the_date = last_date
+            break
+        last_date = maybe
+    return date.fromisoformat(the_date)
+
+def round_closed_yesterday(tasks):
+    if tasks is None:
+        return False
+    sub_range = get_submissions_range(tasks)
+    is_today_the_day = date.today() == max(sub_range) + timedelta(days = 1)
+    if is_today_the_day:
+        print(f"Round closed yesterday: {max(sub_range)}")
+    else:
+        print(f"Round closes on {max(sub_range)}")
+
+    return is_today_the_day
+
+def include_if_round_is_closed(repo, g):
+    print(f"Processing {repo.full_name}")
+    hub = get_hub(repo)
+    tasks = get_tasks(hub, g)
+    # if the round closed yesterday, then we can build the dashboard
+    if round_closed_yesterday(tasks):
+        return {"owner": repo.owner.login, "name": repo.name}
+    else:
+        return None
+
+
+
+
 
 # generate a random ID to assing the variable
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -84,9 +181,10 @@ def list_repositories():
         print("fetching repositories")
         ghapp = get_app()
         repos = []
+        g = api_access()
         for installation in ghapp["inst"]:
             # get the full names for the repositories
-            repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos()]
+            repos += [include_if_round_is_closed(x, g) for x in installation.get_repos()]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
@@ -97,7 +195,7 @@ def list_repositories():
         except ValueError:
             pass
 
-    write_json("repos", repos)
+    write_json("repos", [x for x in repos if x is not None])
 
 def get_token():
     ghapp = get_app()
