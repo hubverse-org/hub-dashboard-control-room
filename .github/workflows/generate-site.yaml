@@ -6,16 +6,18 @@ on:
         required: true
         type: string
       slug:
-        required: true
+        required: false
         type: string
       email:
-        required: true
+        required: false
         type: string
     secrets:
       id:
-        required: true
+        required: false
       key:
-        required: true
+        required: false
+      token:
+        required: false
 
 jobs:
   build-site:
@@ -35,6 +37,7 @@ jobs:
         - ${{ github.workspace }}:/site
     steps:
       - uses: actions/create-github-app-token@v1
+        if: ${{ secrets.id }}
         name: "Generate App Token (if no token present)"
         id: token
         with:
@@ -53,7 +56,7 @@ jobs:
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.token }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: check-configs
@@ -139,7 +142,7 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.token }}"
       - id: checkout-pages
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
@@ -148,7 +151,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           ref: gh-pages
           path: 'pages'
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.token }}
       - id: fetch-artifact
         name: "Load changes"
         uses: actions/download-artifact@v4
@@ -162,4 +165,4 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.token }}"
