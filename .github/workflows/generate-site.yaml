@@ -6,10 +6,10 @@ on:
         required: true
         type: string
       slug:
-        required: false
+        required: true
         type: string
       email:
-        required: false
+        required: true
         type: string
     secrets:
       id:
