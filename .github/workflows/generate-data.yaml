@@ -73,6 +73,7 @@ jobs:
         name: "Fetch deployment scripts"
         uses: actions/checkout@v4
         with:
+          path: scripts
           repository: hubverse-org/hub-dashboard-control-room
           persist-credentials: false
           sparse-checkout: |
