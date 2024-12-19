@@ -13,11 +13,9 @@ on:
         type: string
     secrets:
       id:
-        required: false
+        required: true
       key:
-        required: false
-      token:
-        required: false
+        required: true
 
 jobs:
   build-site:
@@ -40,7 +38,7 @@ jobs:
         name: "Check if we are running a bot"
         run: |
           echo "${{ secrets.token }}"
-          if [[ -z "${{ secrets.id }}" ]]; then
+          if [[ "${{ secrets.id }}"=="none" ]]; then
             bot=false
           else
             bot=true
@@ -67,7 +65,7 @@ jobs:
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token || secrets.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: check-configs
@@ -157,14 +155,14 @@ jobs:
       - id: check-branch
         name: "check for gh-pages branch and create if needed"
         env:
-          GH_TOKEN: ${{ secrets.token || github.token }}
+          GH_TOKEN: ${{ secrets.key || github.token }}
         run: | 
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "gh-pages" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-pages
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
@@ -173,7 +171,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           ref: gh-pages
           path: 'pages'
-          token: ${{ steps.token.outputs.token || secrets.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
         name: "Load changes"
         uses: actions/download-artifact@v4
