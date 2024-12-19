@@ -73,7 +73,7 @@ jobs:
         name: "Fetch deployment scripts"
         uses: actions/checkout@v4
         with:
-          path: ${{ github.temp }}/scripts
+          path: ${{ runner.temp }}/scripts
           repository: hubverse-org/hub-dashboard-control-room
           persist-credentials: false
           sparse-checkout: |
@@ -102,7 +102,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          bash -x "${{ github.temp }}/scripts/check-branch.sh" \
+          bash -x "${{ runner.temp }}/scripts/check-branch.sh" \
             "ptc/data" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
