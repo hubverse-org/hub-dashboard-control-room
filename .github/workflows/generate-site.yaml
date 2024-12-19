@@ -40,9 +40,9 @@ jobs:
         name: "Check if we are running a bot"
         run: |
           if [[ -z "${{ secrets.id }}" ]]; then
-            bot=true
-          else
             bot=false
+          else
+            bot=true
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
@@ -139,9 +139,9 @@ jobs:
         name: "Check if we are running a bot"
         run: |
           if [[ -z "${{ secrets.id }}" ]]; then
-            bot=true
-          else
             bot=false
+          else
+            bot=true
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
