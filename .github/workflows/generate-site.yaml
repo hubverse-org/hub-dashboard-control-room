@@ -37,7 +37,7 @@ jobs:
         - ${{ github.workspace }}:/site
     steps:
       - uses: actions/create-github-app-token@v1
-        if: ${{ secrets.id || false }}
+        if: ${{ secrets.id != "" }}
         name: "Generate App Token (if no token present)"
         id: token
         with:
@@ -126,8 +126,8 @@ jobs:
           sparse-checkout: |
             scripts
       - uses: actions/create-github-app-token@v1
+        if: ${{ secrets.id != "" }}
         id: token
-        if: ${{ secrets.id || false }}
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
