@@ -56,7 +56,7 @@ jobs:
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token || secrets.token }}
+          token: ${{ steps.token.outputs.token || github.token }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: check-configs
@@ -152,7 +152,7 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.token }}"
+            "${{ steps.token.outputs.token || github.token }}"
       - id: checkout-pages
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
@@ -161,7 +161,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           ref: gh-pages
           path: 'pages'
-          token: ${{ steps.token.outputs.token || secrets.token }}
+          token: ${{ steps.token.outputs.token || github.token }}
       - id: fetch-artifact
         name: "Load changes"
         uses: actions/download-artifact@v4
@@ -175,4 +175,4 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.token }}"
+            "${{ steps.token.outputs.token || github.token }}"
