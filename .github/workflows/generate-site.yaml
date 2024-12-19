@@ -45,6 +45,7 @@ jobs:
             bot=false
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - uses: actions/create-github-app-token@v1
         if: ${{ steps.is-bot.outputs.bot }}
         name: "Generate App Token (if no token present)"
@@ -143,6 +144,7 @@ jobs:
             bot=false
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - uses: actions/create-github-app-token@v1
         if: ${{ steps.is-bot.outputs.bot }}
         id: token
