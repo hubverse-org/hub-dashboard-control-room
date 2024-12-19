@@ -69,15 +69,6 @@ jobs:
           private-key: ${{ secrets.key }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
-      - id: checkout-this-here-repo-scripts
-        name: "Fetch deployment scripts"
-        uses: actions/checkout@v4
-        with:
-          path: scripts
-          repository: hubverse-org/hub-dashboard-control-room
-          persist-credentials: false
-          sparse-checkout: |
-            scripts
       - id: checkout-config
         name: "Fetch config files"
         uses: actions/checkout@v4
@@ -102,7 +93,8 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+          curl "https://raw.githubusercontent.com/hubverse-org/hub-dashboard-control-room/refs/heads/znk/no-token/scripts/check-branch.sh" |
+          bash -x /dev/stdin \
             "ptc/data" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
