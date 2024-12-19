@@ -184,4 +184,4 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"

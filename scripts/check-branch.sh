@@ -16,7 +16,7 @@ if [[ "$exists" != "${branch}" ]]; then
   git init
   git switch -c "${branch}"
   git remote add origin https://${slug}:${token}@github.com/${repo}.git
-  git commit --allow-empty -m 'initial ${branch} commit'
+  git commit --allow-empty -m "initial ${branch} commit"
   git push --set-upstream origin "${branch}"
   cd
 fi
