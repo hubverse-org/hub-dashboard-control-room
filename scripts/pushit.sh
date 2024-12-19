@@ -17,9 +17,9 @@ else
 fi
 
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
-git config --global user.name "${slug}[bot]"
+git config --global user.name "${slug}"
 git config --global user.email "${email}"
-git remote set-url origin "https://${slug}[bot]:${token}@github.com/${repo}.git"
+git remote set-url origin "https://${slug}:${token}@github.com/${repo}.git"
 ls
 git status
 if [[ "${amend}" == "true" ]]; then

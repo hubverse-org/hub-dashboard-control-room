@@ -37,7 +37,6 @@ jobs:
       - id: is-bot
         name: "Check if we are running a bot"
         run: |
-          echo "${{ secrets.key }}"
           if [[ "${{ secrets.id }}"=="none" ]]; then
             bot=false
           else
