@@ -69,6 +69,14 @@ jobs:
           private-key: ${{ secrets.key }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
+      - id: checkout-this-here-repo-scripts
+        name: "Fetch deployment scripts"
+        uses: actions/checkout@v4
+        with:
+          repository: hubverse-org/hub-dashboard-control-room
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
       - id: checkout-config
         name: "Fetch config files"
         uses: actions/checkout@v4
@@ -88,14 +96,6 @@ jobs:
             echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predtimechart-config.yml file found. Exiting."
             exit 1
           fi
-      - id: checkout-this-here-repo-scripts
-        name: "Fetch deployment scripts"
-        uses: actions/checkout@v4
-        with:
-          repository: hubverse-org/hub-dashboard-control-room
-          persist-credentials: false
-          sparse-checkout: |
-            scripts
       - id: check-branch
         name: "check for ptc/data branch and create if needed"
         env:
