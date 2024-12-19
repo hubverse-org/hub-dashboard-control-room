@@ -154,7 +154,7 @@ jobs:
       - id: check-branch
         name: "check for gh-pages branch and create if needed"
         env:
-          GH_TOKEN: ${{ secrets.key || github.token }}
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "gh-pages" \
