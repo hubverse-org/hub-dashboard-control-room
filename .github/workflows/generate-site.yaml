@@ -36,6 +36,15 @@ jobs:
       volumes:
         - ${{ github.workspace }}:/site
     steps:
+      - id: is-bot
+        name: "Check if we are running a bot"
+        run: |
+          if [[ -z "${{ secrets.id }}" ]]; then
+            bot=true
+          else
+            bot=false
+          fi
+          echo "bot=$bot" >> "$GITHUB_OUTPUT"
       - uses: actions/create-github-app-token@v1
         if: ${{ steps.is-bot.outputs.bot }}
         name: "Generate App Token (if no token present)"
