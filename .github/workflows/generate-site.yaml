@@ -42,6 +42,7 @@ jobs:
           else
             bot=true
           fi
+          echo "bot is $bot"
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
       - uses: actions/create-github-app-token@v1
