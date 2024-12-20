@@ -26,8 +26,8 @@ jobs:
     name: "Generate Data"
     runs-on: ubuntu-latest
     continue-on-error: true
-    strategy: 
-      matrix: 
+    strategy:
+      matrix:
         site: ${{ fromJSON(inputs.repos) }}
     steps:
       - id: is-bot
@@ -93,14 +93,15 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          curl "https://raw.githubusercontent.com/hubverse-org/hub-dashboard-control-room/refs/heads/znk/no-token/scripts/check-branch.sh" |
-          bash -x /dev/stdin \
-            "ptc/data" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
+          exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
+          if [[ "$exists" != "ptc/data" ]]; then
+            fetch=true
+          else
+            fetch=false
+          fi
+          echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
+        if: ${{ steps.check-branch.outputs.fetch }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
