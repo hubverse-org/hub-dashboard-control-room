@@ -34,7 +34,19 @@ jobs:
       volumes:
         - ${{ github.workspace }}:/site
     steps:
+      - id: is-bot
+        name: "Check if we are running a bot"
+        run: |
+          if [[ "${{ secrets.id }}" = "none" ]]; then
+            bot=false
+          else
+            bot=true
+          fi
+          echo "bot is $bot"
+          echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         name: "Generate App Token (if no token present)"
         id: token
         with:
@@ -53,7 +65,7 @@ jobs:
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
       - id: check-configs
@@ -81,7 +93,7 @@ jobs:
           && echo "success=true" >> $GITHUB_OUTPUT \
           || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
-        # if: ${{ steps.build-site.outputs.success == true }}
+        # if: ${{ fromJSON(steps.build-site.outputs.success) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -89,7 +101,7 @@ jobs:
           path: '/site/pages/'
           retention-days: 1
       # - name: signal success
-      #   # if: ${{ steps.build-site.outputs.success == true }}
+      #   # if: ${{ fromJSON(steps.build-site.outputs.success) }}
       #   run: |
       #     touch "${{runner.temp}}/${{steps.id.outputs.file}}.success" 
   push-site:
@@ -122,7 +134,18 @@ jobs:
           persist-credentials: false
           sparse-checkout: |
             scripts
+      - id: is-bot
+        name: "Check if we are running a bot"
+        run: |
+          if [[ "${{ secrets.id }}" = "none" ]]; then
+            bot=false
+          else
+            bot=true
+          fi
+          echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -132,14 +155,14 @@ jobs:
       - id: check-branch
         name: "check for gh-pages branch and create if needed"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "gh-pages" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-pages
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
@@ -148,7 +171,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           ref: gh-pages
           path: 'pages'
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
         name: "Load changes"
         uses: actions/download-artifact@v4
@@ -162,4 +185,4 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"
