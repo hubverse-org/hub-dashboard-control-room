@@ -62,7 +62,7 @@ jobs:
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - uses: actions/create-github-app-token@v1
-        if: ${{ steps.is-bot.outputs.bot }}
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
