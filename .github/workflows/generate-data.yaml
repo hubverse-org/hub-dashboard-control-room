@@ -101,7 +101,7 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ steps.check-branch.outputs.fetch != 'false' }}
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
@@ -191,7 +191,7 @@ jobs:
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
-        if: ${{ steps.is-bot.outputs.bot }}
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
