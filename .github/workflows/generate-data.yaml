@@ -89,12 +89,12 @@ jobs:
             exit 1
           fi
       - id: check-branch
-        name: "check for ptc/data branch and create if needed"
+        name: "check for ptc/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
           exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
-          if [[ "$exists" != "ptc/data" ]]; then
+          if [[ "$exists" = "ptc/data" ]]; then
             fetch=true
           else
             fetch=false
