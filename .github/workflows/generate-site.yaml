@@ -46,7 +46,7 @@ jobs:
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
       - uses: actions/create-github-app-token@v1
-        if: ${{ steps.is-bot.outputs.bot == true }}
+        if: ${{ steps.is-bot.outputs.bot }}
         name: "Generate App Token (if no token present)"
         id: token
         with:
@@ -93,7 +93,7 @@ jobs:
           && echo "success=true" >> $GITHUB_OUTPUT \
           || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
-        # if: ${{ steps.build-site.outputs.success == true }}
+        # if: ${{ steps.build-site.outputs.success }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -101,7 +101,7 @@ jobs:
           path: '/site/pages/'
           retention-days: 1
       # - name: signal success
-      #   # if: ${{ steps.build-site.outputs.success == true }}
+      #   # if: ${{ steps.build-site.outputs.success }}
       #   run: |
       #     touch "${{runner.temp}}/${{steps.id.outputs.file}}.success" 
   push-site:
@@ -145,7 +145,7 @@ jobs:
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
       - uses: actions/create-github-app-token@v1
-        if: ${{ steps.is-bot.outputs.bot == true }}
+        if: ${{ steps.is-bot.outputs.bot }}
         id: token
         with:
           app-id: ${{ secrets.id }}
