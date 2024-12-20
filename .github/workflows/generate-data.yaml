@@ -101,7 +101,7 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ steps.check-branch.outputs.fetch }}
+        if: ${{ steps.check-branch.outputs.fetch != 'false' }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
