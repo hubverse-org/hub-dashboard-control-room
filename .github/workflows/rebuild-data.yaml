@@ -22,7 +22,7 @@ jobs:
       repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
-      regenerate: ${{ github.event.client_payload.regenerate }}
+      regenerate: ${{ github.event.client_payload.regenerate || false }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
