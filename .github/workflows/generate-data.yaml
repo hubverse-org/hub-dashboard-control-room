@@ -26,10 +26,20 @@ jobs:
     name: "Generate Data"
     runs-on: ubuntu-latest
     continue-on-error: true
-    strategy: 
-      matrix: 
+    strategy:
+      matrix:
         site: ${{ fromJSON(inputs.repos) }}
     steps:
+      - id: is-bot
+        name: "Check if we are running a bot"
+        run: |
+          if [[ "${{ secrets.id }}" = "none" ]]; then
+            bot=false
+          else
+            bot=true
+          fi
+          echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - id: id
         name: "setup run variables"
         run: |
@@ -52,6 +62,7 @@ jobs:
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -63,7 +74,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
           repository: ${{ steps.id.outputs.repo }}
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -77,11 +88,24 @@ jobs:
             echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predtimechart-config.yml file found. Exiting."
             exit 1
           fi
+      - id: check-branch
+        name: "check for ptc/data branch"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        run: | 
+          exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
+          if [[ "$exists" = "ptc/data" ]]; then
+            fetch=true
+          else
+            fetch=false
+          fi
+          echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
           ref: 'ptc/data'
@@ -142,6 +166,16 @@ jobs:
       matrix: 
         site: ${{ fromJSON(inputs.repos) }}
     steps:
+      - id: is-bot
+        name: "Check if we are running a bot"
+        run: |
+          if [[ "${{ secrets.id }}" = "none" ]]; then
+            bot=false
+          else
+            bot=true
+          fi
+          echo "bot=$bot" >> "$GITHUB_OUTPUT"
+        shell: bash
       - id: checkout-this-here-repo-scripts
         uses: actions/checkout@v4
         with:
@@ -157,6 +191,7 @@ jobs:
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -173,7 +208,7 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-pages
         uses: actions/checkout@v4
         with:
@@ -181,7 +216,7 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           ref: ptc/data
           path: 'data'
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
         uses: actions/download-artifact@v4
         with:
@@ -195,4 +230,4 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token }}"
+            "${{ steps.token.outputs.token || secrets.key }}"

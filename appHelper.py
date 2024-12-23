@@ -61,7 +61,7 @@ def get_slug_id():
     app = ghapp["app"]
     app_usr = gh.get_user(app.slug+"[bot]")
     email = f'{app_usr.id}+{app_usr.login}@users.noreply.github.com'
-    write_string("slug", app.slug)
+    write_string("slug", app.slug + "[bot]")
     write_string("email", email)
     write_string("id", app_usr.id)
 
