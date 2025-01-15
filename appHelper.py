@@ -76,7 +76,7 @@ def get_slug_id():
 
 
 def is_known(repo, known):
-    if is known is None:
+    if known is None:
         return(True)
     else:
         return(len(set(repo), known) > 0)
