@@ -83,7 +83,7 @@ def is_known(repo, known):
         return(True)
     mebby = len(set([repo]) & known) > 0
     if mebby is False:
-        print(f"::note::Registered but unknown: {repo}")
+        print(f"::notice::Registered but unknown: {repo}")
     return(mebby)
 
 def list_repositories():
