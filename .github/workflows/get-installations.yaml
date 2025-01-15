@@ -29,8 +29,8 @@ jobs:
   repos:
     name: "Get list of dashboard repositories"
     env:
-      APP_ID: ${{ secrets.id }}
-      PRIVATE_KEY: ${{ secrets.key }}
+      APP_ID: ${{ secrets.id || vars.APP_ID }}
+      PRIVATE_KEY: ${{ secrets.key || secrets.PRIVATE_KEY }}
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.repos.outputs.repos }}
@@ -54,6 +54,7 @@ jobs:
             requirements.txt
             appHelper.py
             getInstallations.py
+            known-hubs.json
       - id: setup-snake
         uses: actions/setup-python@v5
         with:
