@@ -17,7 +17,6 @@ def get_known():
     with open("known-hubs.json", "r") as f:
         known = json.load(f)
     hubs = set(["/".join(list(x.values())) for x in known])
-    print(hubs)
     return(hubs)
 
 # generate a random ID to assing the variable
@@ -78,7 +77,6 @@ def get_slug_id():
 
 
 def is_known(repo, known):
-    print(f"Trying out {repo}")
     if known is None:
         return(True)
     mebby = len(set([repo]) & known) > 0
