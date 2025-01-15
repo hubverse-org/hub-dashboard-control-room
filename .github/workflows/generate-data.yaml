@@ -343,7 +343,8 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
+            "${{ steps.token.outputs.token || secrets.key }}" \
+          && rm -rf data
       - id: check-predevals-branch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -354,8 +355,7 @@ jobs:
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}" \
-          && rm -rf "data/"
+            "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-predevals-data
         uses: actions/checkout@v4
         with:
