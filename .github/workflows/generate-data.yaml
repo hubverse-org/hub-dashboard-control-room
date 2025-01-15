@@ -69,7 +69,7 @@ jobs:
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - uses: actions/create-github-app-token@v1
-        if: ${{ fromJSON(needs.bot.outputs.exists) }}
+        if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
@@ -188,7 +188,7 @@ jobs:
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
-        if: ${{ fromJSON(needs.bot.outputs.exists) }}
+        if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
