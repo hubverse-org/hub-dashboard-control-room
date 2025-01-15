@@ -9,6 +9,15 @@ from github import Auth
 from github import Github
 from github import GithubIntegration
 
+def get_known():
+    if not os.path.isfile("known-hubs.json"):
+        print("no known hubs")
+        return(None)
+    print("I know some hubs")
+    with open("known-hubs.json", r) as f:
+        known = json.load(f)
+    return(set(["/".join(list(x.values())) for x in known]))
+
 # generate a random ID to assing the variable
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -66,6 +75,12 @@ def get_slug_id():
     write_string("id", app_usr.id)
 
 
+def is_known(repo, known):
+    if is known is None:
+        return(True)
+    else:
+        return(len(set(repo), known) > 0)
+
 def list_repositories():
     '''
     Create an output item called "repos" that contains a JSON list of
@@ -82,15 +97,16 @@ def list_repositories():
         repos = json.loads(newbies)
     else:
         print("fetching repositories")
+        known = get_known()
         ghapp = get_app()
         repos = []
         for installation in ghapp["inst"]:
             # get the full names for the repositories
-            repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos()]
+            repos += [{"owner":x.owner.login, "name":x.name} for x in installation.get_repos() if is_known(x.full_name, known)]
     invalid = [
         {"owner":"hubverse-org", "name":"hub-dashboard-control-room"},
         {"owner":"zkamvar", "name":"hub-dashboard-control-room"}
-    ]
+    ] 
     for i in invalid:
         try:
             repos.remove(i)

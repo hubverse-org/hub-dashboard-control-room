@@ -1,0 +1,22 @@
+[
+  {
+    "owner": "elray1",
+    "name": "flusight-dashboard"
+  },
+  {
+    "owner": "reichlab",
+    "name": "flusight-dashboard"
+  },
+  {
+    "owner": "reichlab",
+    "name": "variant-nowcast-hub-dashboard"
+  },
+  {
+    "owner": "reichlab",
+    "name": "covidhub-dashboard"
+  },
+  {
+    "owner": "hubverse-org",
+    "name": "hub-dashboard-template"
+  }
+]

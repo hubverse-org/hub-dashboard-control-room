@@ -54,6 +54,7 @@ jobs:
             requirements.txt
             appHelper.py
             getInstallations.py
+            known-hubs.json
       - id: setup-snake
         uses: actions/setup-python@v5
         with:
