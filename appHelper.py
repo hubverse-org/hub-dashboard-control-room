@@ -81,9 +81,10 @@ def is_known(repo, known):
     print(f"Trying out {repo}")
     if known is None:
         return(True)
-    mebby = set([repo]) & known
-    print(f"Do I know {mebby}? {len(mebby) > 0}")
-    return(len(mebby) > 0)
+    mebby = len(set([repo]) & known) > 0
+    if mebby is False:
+        print(f"::note::Registered but unknown: {repo}")
+    return(mebby)
 
 def list_repositories():
     '''
