@@ -70,6 +70,14 @@ jobs:
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-evals" >> $GITHUB_OUTPUT
+      - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(needs.check.outputs.exists) }}
+        id: token
+        with:
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
+          owner: ${{ matrix.site.owner }}
+          repositories: ${{ matrix.site.name }}
       - id: checkout-config
         name: "Fetch config files"
         uses: actions/checkout@v4
