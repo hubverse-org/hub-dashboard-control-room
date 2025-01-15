@@ -123,7 +123,6 @@ jobs:
           path: 'repo'
       - id: build-targets
         name: "Generate scores data"
-        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
         run: |
           prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
           oracle="${prefix}/oracle-data/oracle-output.csv"
@@ -265,9 +264,9 @@ jobs:
           name: ${{ steps.id.outputs.file }}
           path: 'out/'
   push-data:
-    name: "Push Forecast Data"
+    name: "Push Data"
     runs-on: ubuntu-latest
-    needs: [check, build-forecasts]
+    needs: [check, build-forecasts, build-evals]
     continue-on-error: true
     strategy: 
       matrix: 
@@ -286,7 +285,8 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-data" >> $GITHUB_OUTPUT
+          echo "ptc-file=$owner-$name-data" >> $GITHUB_OUTPUT
+          echo "predevals-file=$owner-$name-evals" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -295,10 +295,10 @@ jobs:
           private-key: ${{ secrets.key }}
           owner: ${{ matrix.site.owner }}
           repositories: ${{ matrix.site.name }}
-      - id: check-branch
+      - id: check-ptc-branch
         env:
           GH_TOKEN: ${{ github.token }}
-        name: "check for gh-pages branch and create if needed"
+        name: "check for ptc/data branch and create if needed"
         run: | 
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "ptc/data" \
@@ -306,7 +306,7 @@ jobs:
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token || secrets.key }}"
-      - id: checkout-pages
+      - id: checkout-ptc-data
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -314,16 +314,50 @@ jobs:
           ref: ptc/data
           path: 'data'
           token: ${{ steps.token.outputs.token || secrets.key }}
-      - id: fetch-artifact
+      - id: ptc-fetch-artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.id.outputs.file }}
-      - id: publish
+          name: ${{ steps.id.outputs.ptc-file }}
+      - id: ptc-publish
         name: "Publish to ptc/data branch"
         run: | 
           ls -larth
           bash -x "${{ github.workspace }}/scripts/pushit.sh" \
             "ptc/data" \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token || secrets.key }}"
+      - id: check-predevals-branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        name: "check for predevals/data branch and create if needed"
+        run: |
+          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+            "predevals/data" \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token || secrets.key }}" \
+          && rm -rf "data/"
+      - id: checkout-predevals-data
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+          ref: predevals/data
+          path: 'data'
+          token: ${{ steps.token.outputs.token || secrets.key }}
+      - id: predevals-fetch-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.id.outputs.predevals-file }}
+      - id: predevals-publish
+        name: "Publish to predevals/data branch"
+        run: | 
+          ls -larth
+          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
+            "predevals/data" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
