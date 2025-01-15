@@ -81,8 +81,9 @@ def is_known(repo, known):
     print(f"Trying out {repo}")
     if known is None:
         return(True)
-    else:
-        return(len(set(repo) & known) > 0)
+    mebby = set([repo]) & known
+    print(f"Do I know {mebby}? {len(mebby) > 0}")
+    return(len(mebby) > 0)
 
 def list_repositories():
     '''
