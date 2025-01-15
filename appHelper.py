@@ -16,7 +16,9 @@ def get_known():
     print("I know some hubs")
     with open("known-hubs.json", "r") as f:
         known = json.load(f)
-    return(set(["/".join(list(x.values())) for x in known]))
+    hubs = set(["/".join(list(x.values())) for x in known])
+    print(hubs)
+    return(hubs)
 
 # generate a random ID to assing the variable
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -76,6 +78,7 @@ def get_slug_id():
 
 
 def is_known(repo, known):
+    print(f"Trying out {repo}")
     if known is None:
         return(True)
     else:
