@@ -14,7 +14,7 @@ def get_known():
         print("no known hubs")
         return(None)
     print("I know some hubs")
-    with open("known-hubs.json", r) as f:
+    with open("known-hubs.json", "r") as f:
         known = json.load(f)
     return(set(["/".join(list(x.values())) for x in known]))
 
