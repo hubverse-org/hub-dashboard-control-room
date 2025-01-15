@@ -126,7 +126,7 @@ jobs:
         run: |
           prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
           oracle="${prefix}/oracle-data/oracle-output.csv"
-          create-predevals-data.R \
+          create-predeval-data.R \
           -h repo \
           -c predeval-config.yml \
           -d $oracle \
