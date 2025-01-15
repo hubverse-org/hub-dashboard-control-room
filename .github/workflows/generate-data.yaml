@@ -89,7 +89,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "predevals/data")')
+          exists=$(curl -sSL "https://api.github.com/repos/${{ steps.id.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
           if [[ "$exists" = "predevals/data" ]]; then
             fetch=true
           else
