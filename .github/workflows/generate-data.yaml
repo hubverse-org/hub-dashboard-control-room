@@ -38,6 +38,105 @@ jobs:
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
+  build-evals:
+    needs: [check]
+    name: "Generate Eval Page Data"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        site: ${{ fromJSON(inputs.repos) }}
+    container:
+      image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
+      ports:
+        - 80
+      volumes:
+        - ${{ github.workspace }}:/project
+    steps:
+      - id: id
+        name: "setup run variables"
+        run: |
+          if [[ -n "${{ matrix.site.build }}" ]]; then
+            echo "build=${{ matrix.site.build }}" >> $GITHUB_OUTPUT
+          else
+            echo "build=both" >> $GITHUB_OUTPUT
+          fi
+          owner="${{ matrix.site.owner }}"
+          name="${{ matrix.site.name }}"
+          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-evals" >> $GITHUB_OUTPUT
+      - id: checkout-config
+        name: "Fetch config files"
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          token: ${{ steps.token.outputs.token || secrets.key }}
+          repository: ${{ steps.id.outputs.repo }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            predeval-config.yml
+            site-config.yml
+      - id: check-configs
+        name: "Check if we need to build data"
+        shell: "bash"
+        run: |
+          if [[ ! -f predeval-config.yml ]]; then
+            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predeval-config.yml file found. Exiting."
+            exit 1
+          fi
+      - id: check-branch
+        name: "check for predevals/data branch"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        run: | 
+          exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "predevals/data")')
+          if [[ "$exists" = "predevals/data" ]]; then
+            fetch=true
+          else
+            fetch=false
+          fi
+          echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
+      - id: checkout-data
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
+        name: "Checkout predevals/data branch"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token || secrets.key }}
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+          ref: 'predevals/data'
+          path: 'out'
+      - id: get-repo-name
+        name: "Get information about hub"
+        run: |
+          mkdir -p out/
+          yq eval '.hub' site-config.yml \
+          | sed -E -e 's+(https://github.com/|^)+repo=+' \
+          | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
+      - id: clone-repo
+        name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ steps.get-repo-name.outputs.repo }}
+          path: 'repo'
+      - id: build-targets
+        name: "Generate scores data"
+        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
+        run: |
+          prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
+          oracle="${prefix}/oracle-data/oracle-output.csv"
+          create-predevals-data.R \
+          -h repo \
+          -c predeval-config.yml \
+          -d $oracle \
+          -o out
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.id.outputs.file }}
+          path: 'out/'
   build-forecasts:
     needs: [check]
     name: "Generate Forecast Page Data"
