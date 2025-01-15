@@ -79,7 +79,7 @@ def is_known(repo, known):
     if known is None:
         return(True)
     else:
-        return(len(set(repo), known) > 0)
+        return(len(set(repo) & known) > 0)
 
 def list_repositories():
     '''
