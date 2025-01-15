@@ -66,7 +66,7 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-evals" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-predeval" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -165,7 +165,7 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-data" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-ptc" >> $GITHUB_OUTPUT
       - id: setup-snake
         uses: actions/setup-python@v5
         with:
@@ -270,103 +270,135 @@ jobs:
         with:
           name: ${{ steps.id.outputs.file }}
           path: 'out/'
-  push-data:
-    name: "Push Data"
-    runs-on: ubuntu-latest
-    needs: [check, build-forecasts, build-evals]
-    continue-on-error: true
+  push-ptc-data:
+    needs: [check, build-forecasts]
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
     strategy: 
       matrix: 
         site: ${{ fromJSON(inputs.repos) }}
-    steps:
-      - id: checkout-this-here-repo-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: hubverse-org/hub-dashboard-control-room
-          ref: znk/hub-evals
-          persist-credentials: false
-          sparse-checkout: |
-            scripts
-      - id: id
-        name: "setup run variables"
-        run: |
-          owner="${{ matrix.site.owner }}"
-          name="${{ matrix.site.name }}"
-          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "ptc-file=$owner-$name-data" >> $GITHUB_OUTPUT
-          echo "predevals-file=$owner-$name-evals" >> $GITHUB_OUTPUT
-      - uses: actions/create-github-app-token@v1
-        if: ${{ fromJSON(needs.check.outputs.exists) }}
-        id: token
-        with:
-          app-id: ${{ secrets.id }}
-          private-key: ${{ secrets.key }}
-          owner: ${{ matrix.site.owner }}
-          repositories: ${{ matrix.site.name }}
-      - id: check-ptc-branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        name: "check for ptc/data branch and create if needed"
-        run: | 
-          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-            "ptc/data" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
-      - id: checkout-ptc-data
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          repository: ${{ steps.id.outputs.repo }}
-          ref: ptc/data
-          path: 'data'
-          token: ${{ steps.token.outputs.token || secrets.key }}
-      - id: ptc-fetch-artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ steps.id.outputs.ptc-file }}
-      - id: ptc-publish
-        name: "Publish to ptc/data branch"
-        run: | 
-          ls -larth
-          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
-            "ptc/data" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}" \
-          && rm -rf data
-      - id: check-predevals-branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        name: "check for predeval/data branch and create if needed"
-        run: |
-          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-            "predeval/data" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
-      - id: checkout-predevals-data
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          repository: ${{ steps.id.outputs.repo }}
-          ref: predeval/data
-          path: 'data'
-          token: ${{ steps.token.outputs.token || secrets.key }}
-      - id: predevals-fetch-artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ steps.id.outputs.predevals-file }}
-      - id: predevals-publish
-        name: "Publish to predeval/data branch"
-        run: | 
-          ls -larth
-          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
-            "predeval/data" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
+    with:
+      is_bot: ${{ needs.check.outputs.exists }}
+      branch: "ptc/data"
+      artifact: ${{ matrix.owner }}-${{ matrix.name }}-ptc
+      owner: ${{ matrix.owner }}
+      name: ${{ matrix.name }}
+      slug: ${{ inputs.slug }}
+      email: ${{ inputs.email }}
+    secrets: inherit
+  push-predeval-data:
+    needs: [check, build-evals]
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
+    strategy:
+      matrix:
+        site: ${{ fromJSON(inputs.repos) }}
+    with:
+      is_bot: ${{ needs.check.outputs.exists }}
+      branch: "predeval/data"
+      artifact: ${{ matrix.owner }}-${{ matrix.name }}-predeval
+      owner: ${{ matrix.owner }}
+      name: ${{ matrix.name }}
+      slug: ${{ inputs.slug }}
+      email: ${{ inputs.email }}
+    secrets: inherit
+
+
+
+    # name: "Push Data"
+    # runs-on: ubuntu-latest
+    # needs: [check, build-forecasts, build-evals]
+    # continue-on-error: true
+    # strategy: 
+    #   matrix: 
+    #     site: ${{ fromJSON(inputs.repos) }}
+    # steps:
+    #   - id: checkout-this-here-repo-scripts
+    #     uses: actions/checkout@v4
+    #     with:
+    #       repository: hubverse-org/hub-dashboard-control-room
+    #       ref: znk/hub-evals
+    #       persist-credentials: false
+    #       sparse-checkout: |
+    #         scripts
+    #   - id: id
+    #     name: "setup run variables"
+    #     run: |
+    #       owner="${{ matrix.site.owner }}"
+    #       name="${{ matrix.site.name }}"
+    #       echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+    #       echo "ptc-file=$owner-$name-data" >> $GITHUB_OUTPUT
+    #       echo "predevals-file=$owner-$name-evals" >> $GITHUB_OUTPUT
+    #   - uses: actions/create-github-app-token@v1
+    #     if: ${{ fromJSON(needs.check.outputs.exists) }}
+    #     id: token
+    #     with:
+    #       app-id: ${{ secrets.id }}
+    #       private-key: ${{ secrets.key }}
+    #       owner: ${{ matrix.site.owner }}
+    #       repositories: ${{ matrix.site.name }}
+    #   - id: check-ptc-branch
+    #     env:
+    #       GH_TOKEN: ${{ github.token }}
+    #     name: "check for ptc/data branch and create if needed"
+    #     run: | 
+    #       bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+    #         "ptc/data" \
+    #         "${{ steps.id.outputs.repo }}" \
+    #         "${{ inputs.slug }}" \
+    #         "${{ inputs.email }}" \
+    #         "${{ steps.token.outputs.token || secrets.key }}"
+    #   - id: checkout-ptc-data
+    #     uses: actions/checkout@v4
+    #     with:
+    #       persist-credentials: false
+    #       repository: ${{ steps.id.outputs.repo }}
+    #       ref: ptc/data
+    #       path: 'data'
+    #       token: ${{ steps.token.outputs.token || secrets.key }}
+    #   - id: ptc-fetch-artifact
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: ${{ steps.id.outputs.ptc-file }}
+    #   - id: ptc-publish
+    #     name: "Publish to ptc/data branch"
+    #     run: | 
+    #       ls -larth
+    #       bash -x "${{ github.workspace }}/scripts/pushit.sh" \
+    #         "ptc/data" \
+    #         "${{ steps.id.outputs.repo }}" \
+    #         "${{ inputs.slug }}" \
+    #         "${{ inputs.email }}" \
+    #         "${{ steps.token.outputs.token || secrets.key }}" \
+    #       && rm -rf data
+    #   - id: check-predevals-branch
+    #     env:
+    #       GH_TOKEN: ${{ github.token }}
+    #     name: "check for predeval/data branch and create if needed"
+    #     run: |
+    #       bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+    #         "predeval/data" \
+    #         "${{ steps.id.outputs.repo }}" \
+    #         "${{ inputs.slug }}" \
+    #         "${{ inputs.email }}" \
+    #         "${{ steps.token.outputs.token || secrets.key }}"
+    #   - id: checkout-predevals-data
+    #     uses: actions/checkout@v4
+    #     with:
+    #       persist-credentials: false
+    #       repository: ${{ steps.id.outputs.repo }}
+    #       ref: predeval/data
+    #       path: 'data'
+    #       token: ${{ steps.token.outputs.token || secrets.key }}
+    #   - id: predevals-fetch-artifact
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: ${{ steps.id.outputs.predevals-file }}
+    #   - id: predevals-publish
+    #     name: "Publish to predeval/data branch"
+    #     run: | 
+    #       ls -larth
+    #       bash -x "${{ github.workspace }}/scripts/pushit.sh" \
+    #         "predeval/data" \
+    #         "${{ steps.id.outputs.repo }}" \
+    #         "${{ inputs.slug }}" \
+    #         "${{ inputs.email }}" \
+    #         "${{ steps.token.outputs.token || secrets.key }}"

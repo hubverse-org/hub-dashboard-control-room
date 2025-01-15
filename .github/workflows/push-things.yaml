@@ -1,0 +1,95 @@
+name: "Push To Branch"
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_call:
+    inputs:
+      is_bot:
+        required: true
+        type: boolean
+      branch:
+        required: true
+        type: string
+      artifact:
+        required: true
+        type: string
+      owner:
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+      slug:
+        required: true
+        type: string
+      email:
+        required: true
+        type: string
+    secrets:
+      id:
+        required: true
+      key:
+        required: true
+
+jobs:
+  push-data:
+    name: "Push Data"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - id: checkout-this-here-repo-scripts
+        uses: actions/checkout@v4
+        with:
+          repository: hubverse-org/hub-dashboard-control-room
+          ref: znk/hub-evals
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+      - id: id
+        name: "setup run variables"
+        run: |
+          owner="${{ inputs.owner }}"
+          name="${{ inputs.name }}"
+          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+      - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(inputs.is_bot) }}
+        id: token
+        with:
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
+          owner: ${{ inputs.owner }}
+          repositories: ${{ inputs.name }}
+      - id: check-branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        name: "check for ${{ inputs.branch }}branch and create if needed"
+        run: | 
+          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
+            "${{ inputs.branch }} \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token || secrets.key }}"
+      - id: checkout-data
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ steps.id.outputs.repo }}
+          ref: ${{ inputs.branch }}
+          path: 'data'
+          token: ${{ steps.token.outputs.token || secrets.key }}
+      - id: fetch-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact }}
+      - id: publish
+        name: "Publish to ${{ inputs.branch }} branch"
+        run: | 
+          ls -larth
+          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
+            "${{ inputs.branch }}" \
+            "${{ steps.id.outputs.repo }}" \
+            "${{ inputs.slug }}" \
+            "${{ inputs.email }}" \
+            "${{ steps.token.outputs.token || secrets.key }}"
