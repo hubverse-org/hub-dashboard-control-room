@@ -96,6 +96,7 @@ jobs:
             fetch=false
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
+        shell: bash
       - id: checkout-data
         if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout predevals/data branch"
