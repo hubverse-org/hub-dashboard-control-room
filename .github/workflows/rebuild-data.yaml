@@ -17,7 +17,7 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/hub-evals
     with:
       repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'
