@@ -282,7 +282,8 @@ jobs:
       - id: checkout-this-here-repo-scripts
         uses: actions/checkout@v4
         with:
-          repository: hubverse-org/hub-dashboard-control-room@znk/hub-evals
+          repository: hubverse-org/hub-dashboard-control-room
+          ref: znk/hub-evals
           persist-credentials: false
           sparse-checkout: |
             scripts
