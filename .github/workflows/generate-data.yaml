@@ -1,4 +1,7 @@
 name: "Generate Target and Forecast Data"
+defaults:
+  run:
+    shell: bash
 on:
   workflow_call:
     inputs:
@@ -25,9 +28,6 @@ jobs:
   check:
     name: "Check Bot Status"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     outputs:
       exists: ${{ steps.bot.outputs.bot }}
     steps:
@@ -44,9 +44,6 @@ jobs:
     needs: [check]
     name: "Generate Eval Page Data"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     continue-on-error: true
     strategy:
       matrix:
@@ -152,9 +149,6 @@ jobs:
     needs: [check]
     name: "Generate Forecast Page Data"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     continue-on-error: true
     strategy:
       matrix:
@@ -279,9 +273,6 @@ jobs:
   push-data:
     name: "Push Data"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     needs: [check, build-forecasts, build-evals]
     continue-on-error: true
     strategy: 
