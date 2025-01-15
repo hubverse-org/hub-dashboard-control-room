@@ -277,7 +277,7 @@ jobs:
       matrix: 
         site: ${{ fromJSON(inputs.repos) }}
     with:
-      is_bot: ${{ needs.check.outputs.exists }}
+      is_bot: ${{ toJSON(needs.check.outputs.exists) }}
       branch: "ptc/data"
       artifact: ${{ matrix.owner }}-${{ matrix.name }}-ptc
       owner: ${{ matrix.owner }}
@@ -292,7 +292,7 @@ jobs:
       matrix:
         site: ${{ fromJSON(inputs.repos) }}
     with:
-      is_bot: ${{ needs.check.outputs.exists }}
+      is_bot: ${{ toJSON(needs.check.outputs.exists) }}
       branch: "predeval/data"
       artifact: ${{ matrix.owner }}-${{ matrix.name }}-predeval
       owner: ${{ matrix.owner }}
