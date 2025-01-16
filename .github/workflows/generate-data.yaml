@@ -352,7 +352,7 @@ jobs:
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "predeval/data"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predeval
+      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predeval-data
       owner: ${{ matrix.site.owner }}
       name: ${{ matrix.site.name }}
       slug: ${{ inputs.slug }}
