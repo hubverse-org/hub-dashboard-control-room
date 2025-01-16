@@ -66,7 +66,7 @@ jobs:
         name: "check for ${{ inputs.branch }}branch and create if needed"
         run: |
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-            "${{ inputs.branch }} \
+            "${{ inputs.branch }}" \
             "${{ steps.id.outputs.repo }}" \
             "${{ inputs.slug }}" \
             "${{ inputs.email }}" \
