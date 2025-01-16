@@ -45,6 +45,10 @@ jobs:
     name: "Generate Eval Page Data"
     runs-on: ubuntu-latest
     continue-on-error: true
+    outputs:
+      ok: ${{ fromJSON(steps.status-check.outputs.ok) }}
+    env:
+      KEY: ${{ matrix.site.owner }}-${{ matrix.site.name }}
     strategy:
       matrix:
         site: ${{ fromJSON(inputs.repos) }}
@@ -86,14 +90,29 @@ jobs:
           sparse-checkout: |
             predeval-config.yml
             site-config.yml
-      - id: check-configs
+      - id: status-check
         name: "Check if we need to build data"
         run: |
           if [[ ! -f predeval-config.yml ]]; then
-            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predeval-config.yml file found. Exiting."
-            exit 1
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            repo=${{ steps.id.outputs.repo }}
+            echo "::notice title=Missing config ($repo)::No predeval-config.yml file found. Exiting."
+            exit 0
           fi
+          file=evals-${{ env.KEY }}
+          touch "$file"
+          {
+            echo '${{ toJSON(matrix.site) }}'
+          } > "$file"
+          echo "ok=true" >> $GITHUB_OUTPUT
+      - id: upload-status
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: evals-${{ env.KEY }}
+          path: evals-${{ env.KEY }}
       - id: check-branch
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "check for predeval/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
@@ -106,7 +125,7 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
+        if: ${{ fromJSON(steps.status-check.outputs.ok) && fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout predeval/data branch"
         uses: actions/checkout@v4
         with:
@@ -116,6 +135,7 @@ jobs:
           ref: 'predeval/data'
           path: 'out'
       - id: get-repo-name
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Get information about hub"
         run: |
           mkdir -p out/
@@ -123,6 +143,7 @@ jobs:
           | sed -E -e 's+(https://github.com/|^)+repo=+' \
           | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: clone-repo
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
         uses: actions/checkout@v4
         with:
@@ -130,6 +151,7 @@ jobs:
           repository: ${{ steps.get-repo-name.outputs.repo }}
           path: 'repo'
       - id: build-targets
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Generate scores data"
         run: |
           prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
@@ -140,6 +162,7 @@ jobs:
           -d $oracle \
           -o out
       - name: Upload artifact
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -150,6 +173,10 @@ jobs:
     name: "Generate Forecast Page Data"
     runs-on: ubuntu-latest
     continue-on-error: true
+    outputs:
+      ok: ${{ fromJSON(steps.status-check.outputs.ok) }}
+    env:
+      KEY: ${{ matrix.site.owner }}-${{ matrix.site.name }}
     strategy:
       matrix:
         site: ${{ fromJSON(inputs.repos) }}
@@ -166,15 +193,6 @@ jobs:
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-ptc" >> $GITHUB_OUTPUT
-      - id: setup-snake
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-      - id: install-predtimechart-tool
-        name: "Install predtimechart conversion tool"
-        run: |
-          pip install --upgrade pip
-          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -194,14 +212,39 @@ jobs:
           sparse-checkout: |
             predtimechart-config.yml
             site-config.yml
-      - id: check-configs
+      - id: status-check
         name: "Check if we need to build data"
         run: |
           if [[ ! -f predtimechart-config.yml ]]; then
-            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No predtimechart-config.yml file found. Exiting."
-            exit 1
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            repo=${{ steps.id.outputs.repo }}
+            echo "::notice title=Missing config ($repo)::No predtimechart-config.yml file found. Exiting."
+            exit 0
           fi
+          file=ptc-${{ env.KEY }}
+          touch "$file"
+          {
+            echo '${{ toJSON(matrix.site) }}'
+          } > "$file"
+          echo "ok=true" >> $GITHUB_OUTPUT
+      - id: setup-snake
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - id: install-predtimechart-tool
+        name: "Install predtimechart conversion tool"
+        run: |
+          pip install --upgrade pip
+          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
+      - id: upload-status
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ptc-${{ env.KEY }}
+          path: ptc-${{ env.KEY }}
       - id: check-branch
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "check for ptc/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
@@ -214,7 +257,7 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
+        if: ${{ fromJSON(steps.status-check.outputs.ok) && fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
@@ -224,6 +267,7 @@ jobs:
           ref: 'ptc/data'
           path: 'out'
       - id: get-repo-name
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Get information about hub"
         run: |
           mkdir -p out/targets/
@@ -232,6 +276,7 @@ jobs:
           | sed -E -e 's+(https://github.com/|^)+repo=+' \
           | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: clone-repo
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
         uses: actions/checkout@v4
         with:
@@ -240,14 +285,14 @@ jobs:
           path: 'repo'
       - id: build-targets
         name: "Generate target data"
-        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
+        if: ${{ fromJSON(steps.status-check.outputs.ok) && steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
         run: |
           ptc_generate_target_json_files \
             repo \
             predtimechart-config.yml \
             out/targets
       - id: json-lives
-        if: ${{ steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
+        if: ${{ fromJSON(steps.status-check.outputs.ok) && steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
         name: "Generate forecast data"
         run: |
           if [[ ${{ inputs.regenerate }} == 'true' ]]; then
@@ -265,17 +310,48 @@ jobs:
               out/forecasts
           fi
       - name: Upload artifact
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
           path: 'out/'
+  check-forecasts:
+    runs-on: ubuntu-latest
+    needs: [build-forecasts]
+    outputs:
+      mat: ${{ steps.list.outputs.ok }}
+      process: ${{ steps.list.outputs.process }}
+    steps:
+      - id: fetch-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: results
+          pattern: ptc-*
+          merge-multiple: true
+      - id: list
+        run: |
+          if [[ ! -d results ]]; then
+            echo "process=false" >> "$GITHUB_OUTPUT"
+            echo "ok=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "process=true" >> "$GITHUB_OUTPUT"
+          res=(results/*)
+          cat ${res[0]}
+          {
+            echo "ok<<EOF"
+            # combine the files in results into one array
+            jq '.' results/* | jq -s .
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
   push-ptc-data:
-    needs: [check, build-forecasts]
+    needs: [check, check-forecasts]
+    if: ${{ needs.check-forecasts.outputs.process }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
     strategy: 
       matrix: 
-        site: ${{ fromJSON(inputs.repos) }}
+        site: ${{ fromJSON(needs.check-forecasts.outputs.mat) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "ptc/data"
@@ -285,12 +361,42 @@ jobs:
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
+  check-predeval:
+    runs-on: ubuntu-latest
+    needs: [build-evals]
+    outputs:
+      mat: ${{ steps.list.outputs.ok }}
+      process: ${{ steps.list.outputs.process }}
+    steps:
+      - id: fetch-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: results
+          pattern: evals-*
+          merge-multiple: true
+      - id: list
+        run: |
+          if [[ ! -d results ]]; then
+            echo "process=false" >> "$GITHUB_OUTPUT"
+            echo "ok=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "process=true" >> "$GITHUB_OUTPUT"
+          res=(results/*)
+          cat ${res[0]}
+          {
+            echo "ok<<EOF"
+            # combine the files in results into one array
+            jq '.' results/* | jq -s .
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
   push-predeval-data:
-    needs: [check, build-evals]
+    needs: [check, check-predeval]
+    if: ${{ needs.check-predeval.outputs.process }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
     strategy:
       matrix:
-        site: ${{ fromJSON(inputs.repos) }}
+        site: ${{ fromJSON(needs.check-predeval.outputs.mat) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "predeval/data"
@@ -300,105 +406,3 @@ jobs:
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
-
-
-
-    # name: "Push Data"
-    # runs-on: ubuntu-latest
-    # needs: [check, build-forecasts, build-evals]
-    # continue-on-error: true
-    # strategy: 
-    #   matrix: 
-    #     site: ${{ fromJSON(inputs.repos) }}
-    # steps:
-    #   - id: checkout-this-here-repo-scripts
-    #     uses: actions/checkout@v4
-    #     with:
-    #       repository: hubverse-org/hub-dashboard-control-room
-    #       ref: znk/hub-evals
-    #       persist-credentials: false
-    #       sparse-checkout: |
-    #         scripts
-    #   - id: id
-    #     name: "setup run variables"
-    #     run: |
-    #       owner="${{ matrix.site.owner }}"
-    #       name="${{ matrix.site.name }}"
-    #       echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-    #       echo "ptc-file=$owner-$name-data" >> $GITHUB_OUTPUT
-    #       echo "predevals-file=$owner-$name-evals" >> $GITHUB_OUTPUT
-    #   - uses: actions/create-github-app-token@v1
-    #     if: ${{ fromJSON(needs.check.outputs.exists) }}
-    #     id: token
-    #     with:
-    #       app-id: ${{ secrets.id }}
-    #       private-key: ${{ secrets.key }}
-    #       owner: ${{ matrix.site.owner }}
-    #       repositories: ${{ matrix.site.name }}
-    #   - id: check-ptc-branch
-    #     env:
-    #       GH_TOKEN: ${{ github.token }}
-    #     name: "check for ptc/data branch and create if needed"
-    #     run: | 
-    #       bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-    #         "ptc/data" \
-    #         "${{ steps.id.outputs.repo }}" \
-    #         "${{ inputs.slug }}" \
-    #         "${{ inputs.email }}" \
-    #         "${{ steps.token.outputs.token || secrets.key }}"
-    #   - id: checkout-ptc-data
-    #     uses: actions/checkout@v4
-    #     with:
-    #       persist-credentials: false
-    #       repository: ${{ steps.id.outputs.repo }}
-    #       ref: ptc/data
-    #       path: 'data'
-    #       token: ${{ steps.token.outputs.token || secrets.key }}
-    #   - id: ptc-fetch-artifact
-    #     uses: actions/download-artifact@v4
-    #     with:
-    #       name: ${{ steps.id.outputs.ptc-file }}
-    #   - id: ptc-publish
-    #     name: "Publish to ptc/data branch"
-    #     run: | 
-    #       ls -larth
-    #       bash -x "${{ github.workspace }}/scripts/pushit.sh" \
-    #         "ptc/data" \
-    #         "${{ steps.id.outputs.repo }}" \
-    #         "${{ inputs.slug }}" \
-    #         "${{ inputs.email }}" \
-    #         "${{ steps.token.outputs.token || secrets.key }}" \
-    #       && rm -rf data
-    #   - id: check-predevals-branch
-    #     env:
-    #       GH_TOKEN: ${{ github.token }}
-    #     name: "check for predeval/data branch and create if needed"
-    #     run: |
-    #       bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-    #         "predeval/data" \
-    #         "${{ steps.id.outputs.repo }}" \
-    #         "${{ inputs.slug }}" \
-    #         "${{ inputs.email }}" \
-    #         "${{ steps.token.outputs.token || secrets.key }}"
-    #   - id: checkout-predevals-data
-    #     uses: actions/checkout@v4
-    #     with:
-    #       persist-credentials: false
-    #       repository: ${{ steps.id.outputs.repo }}
-    #       ref: predeval/data
-    #       path: 'data'
-    #       token: ${{ steps.token.outputs.token || secrets.key }}
-    #   - id: predevals-fetch-artifact
-    #     uses: actions/download-artifact@v4
-    #     with:
-    #       name: ${{ steps.id.outputs.predevals-file }}
-    #   - id: predevals-publish
-    #     name: "Publish to predeval/data branch"
-    #     run: | 
-    #       ls -larth
-    #       bash -x "${{ github.workspace }}/scripts/pushit.sh" \
-    #         "predeval/data" \
-    #         "${{ steps.id.outputs.repo }}" \
-    #         "${{ inputs.slug }}" \
-    #         "${{ inputs.email }}" \
-    #         "${{ steps.token.outputs.token || secrets.key }}"
