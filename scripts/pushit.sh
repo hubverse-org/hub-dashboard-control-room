@@ -25,7 +25,7 @@ case "$branch" in
     dir="data"
     msg="update data"
     amend=false
-    to_copy=("scores", "predeval-options.json")
+    to_copy=("scores" "predeval-options.json")
     ;;
   "*")
     echo "oops"
