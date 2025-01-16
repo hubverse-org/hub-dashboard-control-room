@@ -279,9 +279,9 @@ jobs:
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "ptc/data"
-      artifact: ${{ matrix.owner }}-${{ matrix.name }}-ptc
-      owner: ${{ matrix.owner }}
-      name: ${{ matrix.name }}
+      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-ptc
+      owner: ${{ matrix.site.owner }}
+      name: ${{ matrix.site.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
@@ -294,9 +294,9 @@ jobs:
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "predeval/data"
-      artifact: ${{ matrix.owner }}-${{ matrix.name }}-predeval
-      owner: ${{ matrix.owner }}
-      name: ${{ matrix.name }}
+      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predeval
+      owner: ${{ matrix.site.owner }}
+      name: ${{ matrix.site.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit

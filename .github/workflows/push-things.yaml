@@ -64,7 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         name: "check for ${{ inputs.branch }}branch and create if needed"
-        run: | 
+        run: |
           bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
             "${{ inputs.branch }} \
             "${{ steps.id.outputs.repo }}" \
