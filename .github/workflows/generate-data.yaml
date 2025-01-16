@@ -70,7 +70,7 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-predeval" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-predeval-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -99,7 +99,7 @@ jobs:
             echo "::notice title=Missing config ($repo)::No predeval-config.yml file found. Exiting."
             exit 0
           fi
-          file=evals-${{ env.KEY }}
+          file=predeval-${{ env.KEY }}
           touch "$file"
           {
             echo '${{ toJSON(matrix.site) }}'
@@ -109,8 +109,8 @@ jobs:
         if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         uses: actions/upload-artifact@v4
         with:
-          name: evals-${{ env.KEY }}
-          path: evals-${{ env.KEY }}
+          name: predeval-${{ env.KEY }}
+          path: predeval-${{ env.KEY }}
       - id: check-branch
         if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "check for predeval/data branch"
@@ -192,7 +192,7 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-ptc" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-ptc-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -317,86 +317,38 @@ jobs:
           name: ${{ steps.id.outputs.file }}
           path: 'out/'
   check-forecasts:
-    runs-on: ubuntu-latest
     needs: [build-forecasts]
-    outputs:
-      mat: ${{ steps.list.outputs.ok }}
-      process: ${{ steps.list.outputs.process }}
-    steps:
-      - id: fetch-artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: results
-          pattern: ptc-*
-          merge-multiple: true
-      - id: list
-        run: |
-          if [[ ! -d results ]]; then
-            echo "process=false" >> "$GITHUB_OUTPUT"
-            echo "ok=[]" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "process=true" >> "$GITHUB_OUTPUT"
-          res=(results/*)
-          cat ${res[0]}
-          {
-            echo "ok<<EOF"
-            # combine the files in results into one array
-            jq '.' results/* | jq -s .
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@znk/hub-evals
+    with:
+      artifact: "ptc-*"
   push-ptc-data:
     needs: [check, check-forecasts]
     if: ${{ needs.check-forecasts.outputs.process }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
-    strategy: 
-      matrix: 
-        site: ${{ fromJSON(needs.check-forecasts.outputs.mat) }}
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.check-forecasts.outputs.matrix) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "ptc/data"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-ptc
+      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-ptc-data
       owner: ${{ matrix.site.owner }}
       name: ${{ matrix.site.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
   check-predeval:
-    runs-on: ubuntu-latest
     needs: [build-evals]
-    outputs:
-      mat: ${{ steps.list.outputs.ok }}
-      process: ${{ steps.list.outputs.process }}
-    steps:
-      - id: fetch-artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: results
-          pattern: evals-*
-          merge-multiple: true
-      - id: list
-        run: |
-          if [[ ! -d results ]]; then
-            echo "process=false" >> "$GITHUB_OUTPUT"
-            echo "ok=[]" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "process=true" >> "$GITHUB_OUTPUT"
-          res=(results/*)
-          cat ${res[0]}
-          {
-            echo "ok<<EOF"
-            # combine the files in results into one array
-            jq '.' results/* | jq -s .
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@znk/hub-evals
+    with:
+      artifact: "predeval-*"
   push-predeval-data:
     needs: [check, check-predeval]
     if: ${{ needs.check-predeval.outputs.process }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
     strategy:
       matrix:
-        site: ${{ fromJSON(needs.check-predeval.outputs.mat) }}
+        site: ${{ fromJSON(needs.check-predeval.outputs.matrix) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "predeval/data"
