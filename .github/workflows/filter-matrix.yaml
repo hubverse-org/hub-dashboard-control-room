@@ -10,7 +10,7 @@ on:
         type: string
     outputs:
       matrix:
-        description: "A JSON list containing the filtered jobs that can be run furhter"
+        description: "A JSON list containing the filtered jobs that can be run further"
         value: ${{ jobs.check.outputs.mat }}
       process:
         description: "A boolean value indicating that the result should be processed"

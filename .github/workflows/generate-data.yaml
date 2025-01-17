@@ -233,6 +233,7 @@ jobs:
         with:
           python-version: 3.12
       - id: install-predtimechart-tool
+        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Install predtimechart conversion tool"
         run: |
           pip install --upgrade pip
