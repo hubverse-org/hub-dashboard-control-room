@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hubverse-org/hub-dashboard-control-room
-          ref: znk/hub-evals
+          ref: main
           persist-credentials: false
           sparse-checkout: |
             scripts

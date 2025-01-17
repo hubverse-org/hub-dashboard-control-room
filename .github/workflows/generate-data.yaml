@@ -319,13 +319,13 @@ jobs:
           path: 'out/'
   check-forecasts:
     needs: [build-forecasts]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@znk/hub-evals
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@main
     with:
       artifact: "ptc-*"
   push-ptc-data:
     needs: [check, check-forecasts]
     if: ${{ needs.check-forecasts.outputs.process }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     strategy:
       matrix:
         site: ${{ fromJSON(needs.check-forecasts.outputs.matrix) }}
@@ -340,13 +340,13 @@ jobs:
     secrets: inherit
   check-predevals:
     needs: [build-evals]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@znk/hub-evals
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@main
     with:
       artifact: "predevals-*"
   push-predevals-data:
     needs: [check, check-predevals]
     if: ${{ needs.check-predevals.outputs.process }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     strategy:
       matrix:
         site: ${{ fromJSON(needs.check-predevals.outputs.matrix) }}
