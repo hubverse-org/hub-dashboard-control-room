@@ -6,15 +6,32 @@ slug="${3:-missing}"
 email="${4:-missing}"
 token="${5:-missing}"
 
-if [[ "$branch" == "gh-pages" ]];then
-  dir="pages"
-  msg="deploy"
-  amend=true
-else
-  dir="data"
-  msg="update data"
-  amend=false
-fi
+
+case "$branch" in
+  "gh-pages")
+    dir="pages"
+    msg="deploy"
+    amend=true
+    touch .nojekyll
+    to_copy=("site/*" ".nojekyll")
+    ;;
+  "ptc/data")
+    dir="data"
+    msg="update data"
+    amend=false
+    to_copy=("forecasts" "targets" "predtimechart-options.json")
+    ;;
+  "predevals/data")
+    dir="data"
+    msg="update data"
+    amend=false
+    to_copy=("scores" "predevals-options.json")
+    ;;
+  "*")
+    echo "oops"
+    ;;
+esac
+
 
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
 git config --global user.name "${slug}"
@@ -22,18 +39,16 @@ git config --global user.email "${email}"
 git remote set-url origin "https://${slug}:${token}@github.com/${repo}.git"
 ls
 git status
+
 if [[ "${amend}" == "true" ]]; then
   # remove old data/site contents
   git rm -r "*" || echo "nothing to do"
 fi
-if [[ "$branch" == "gh-pages" ]]; then
-  cp -R ../_site/* .
-  touch .nojekyll
-else 
-  cp -R ../forecasts .
-  cp -R ../targets .
-  cp ../predtimechart-options.json .
-fi
+
+for file in "${to_copy[@]}"; do
+  cp -R "../$file" .
+done
+
 git add .
 if [[ "${amend}" == "true" ]]; then
 git commit --amend -m "$msg"
