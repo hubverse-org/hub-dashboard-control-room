@@ -21,11 +21,11 @@ case "$branch" in
     amend=false
     to_copy=("forecasts" "targets" "predtimechart-options.json")
     ;;
-  "predeval/data")
+  "predevals/data")
     dir="data"
     msg="update data"
     amend=false
-    to_copy=("scores" "predeval-options.json")
+    to_copy=("scores" "predevals-options.json")
     ;;
   "*")
     echo "oops"

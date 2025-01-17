@@ -70,7 +70,7 @@ jobs:
           owner="${{ matrix.site.owner }}"
           name="${{ matrix.site.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-predeval-data" >> $GITHUB_OUTPUT
+          echo "file=$owner-$name-predevals-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
@@ -88,18 +88,18 @@ jobs:
           repository: ${{ steps.id.outputs.repo }}
           sparse-checkout-cone-mode: false
           sparse-checkout: |
-            predeval-config.yml
+            predevals-config.yml
             site-config.yml
       - id: status-check
         name: "Check if we need to build data"
         run: |
-          if [[ ! -f predeval-config.yml ]]; then
+          if [[ ! -f predevals-config.yml ]]; then
             echo "ok=false" >> "$GITHUB_OUTPUT"
             repo=${{ steps.id.outputs.repo }}
-            echo "::notice title=Missing config ($repo)::No predeval-config.yml file found. Exiting."
+            echo "::notice title=Missing config ($repo)::No predevals-config.yml file found. Exiting."
             exit 0
           fi
-          file=predeval-${{ env.KEY }}
+          file=predevals-${{ env.KEY }}
           touch "$file"
           {
             echo '${{ toJSON(matrix.site) }}'
@@ -109,16 +109,16 @@ jobs:
         if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         uses: actions/upload-artifact@v4
         with:
-          name: predeval-${{ env.KEY }}
-          path: predeval-${{ env.KEY }}
+          name: predevals-${{ env.KEY }}
+          path: predevals-${{ env.KEY }}
       - id: check-branch
         if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        name: "check for predeval/data branch"
+        name: "check for predevals/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          exists=$(curl -sSL "https://api.github.com/repos/${{ steps.id.outputs.repo }}/branches" | jq '.[].name | select(. == "predeval/data")')
-          if [[ "$exists" = "predeval/data" ]]; then
+          exists=$(curl -sSL "https://api.github.com/repos/${{ steps.id.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
+          if [[ "$exists" = "predevals/data" ]]; then
             fetch=true
           else
             fetch=false
@@ -126,13 +126,13 @@ jobs:
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
         if: ${{ fromJSON(steps.status-check.outputs.ok) && fromJSON(steps.check-branch.outputs.fetch) }}
-        name: "Checkout predeval/data branch"
+        name: "Checkout predevals/data branch"
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
-          ref: 'predeval/data'
+          ref: 'predevals/data'
           path: 'out'
       - id: get-repo-name
         if: ${{ fromJSON(steps.status-check.outputs.ok) }}
@@ -156,9 +156,9 @@ jobs:
         run: |
           prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
           oracle="${prefix}/oracle-data/oracle-output.csv"
-          create-predeval-data.R \
+          create-predevals-data.R \
           -h repo \
-          -c predeval-config.yml \
+          -c predevals-config.yml \
           -d $oracle \
           -o out
       - name: Upload artifact
@@ -338,22 +338,22 @@ jobs:
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
-  check-predeval:
+  check-predevals:
     needs: [build-evals]
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@znk/hub-evals
     with:
-      artifact: "predeval-*"
-  push-predeval-data:
-    needs: [check, check-predeval]
-    if: ${{ needs.check-predeval.outputs.process }}
+      artifact: "predevals-*"
+  push-predevals-data:
+    needs: [check, check-predevals]
+    if: ${{ needs.check-predevals.outputs.process }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/hub-evals
     strategy:
       matrix:
-        site: ${{ fromJSON(needs.check-predeval.outputs.matrix) }}
+        site: ${{ fromJSON(needs.check-predevals.outputs.matrix) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
-      branch: "predeval/data"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predeval-data
+      branch: "predevals/data"
+      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predevals-data
       owner: ${{ matrix.site.owner }}
       name: ${{ matrix.site.name }}
       slug: ${{ inputs.slug }}
