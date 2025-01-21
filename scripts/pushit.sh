@@ -49,7 +49,9 @@ if [[ "${amend}" == "true" ]]; then
 fi
 
 for file in "${to_copy[@]}"; do
-  cp -R "../$file" .
+  # this is necessary for getting around the problem that you cannot
+  # pass a variable with a glob to `cp`
+  eval "cp -R ../$file ."
 done
 
 git add .
