@@ -1,5 +1,9 @@
 [
   {
+    "owner": "zkamvar",
+    "name": "test-hub-dashboard"
+  },
+  {
     "owner": "elray1",
     "name": "flusight-dashboard"
   },

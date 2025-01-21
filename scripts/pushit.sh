@@ -33,6 +33,7 @@ case "$branch" in
 esac
 
 
+ls
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
 git config --global user.name "${slug}"
 git config --global user.email "${email}"
