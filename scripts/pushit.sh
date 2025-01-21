@@ -13,7 +13,7 @@ case "$branch" in
     msg="deploy"
     amend=true
     touch .nojekyll
-    to_copy=("site/*" ".nojekyll")
+    to_copy=("_site/*" ".nojekyll")
     ;;
   "ptc/data")
     dir="data"
