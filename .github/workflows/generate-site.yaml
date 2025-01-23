@@ -121,9 +121,9 @@ jobs:
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.is-bot) }}
       branch: "gh-pages"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-site
-      owner: ${{ env.OWNER }}
-      name: ${{ env.REPO }}
+      artifact: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}-${{ inputs.name || fromJSON(inputs.repos)[0].name }}-site
+      owner: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
+      name: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
