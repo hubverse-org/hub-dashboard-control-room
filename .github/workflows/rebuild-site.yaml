@@ -14,8 +14,9 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
-    matrix:
-      site: ${{ fromJSON(needs.repos.outputs.repos) }}
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@znk/move-matrix/14
     with:
       owner: '${{ matrix.site.owner }}'
