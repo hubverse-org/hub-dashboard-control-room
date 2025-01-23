@@ -30,6 +30,10 @@ on:
       key:
         required: true
 
+env:
+  OWNER: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
+  REPO: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
+
 jobs:
   check-input:
     name: "Check Input"
@@ -41,17 +45,13 @@ jobs:
       - id: check
         name: "Check input values"
         run: |
-          owner=${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
-          name=${{ inputs.name || fromJSON(inputs.repos)[0].name }}
-          echo "owner=$owner" >> "$GITHUB_OUTPUT"
-          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo 'owner=${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}' >> "$GITHUB_OUTPUT"
+
+          echo 'name=${{ inputs.name || fromJSON(inputs.repos)[0].name }}' >> "$GITHUB_OUTPUT"
+
   build-site:
-    needs: [check-input]
     name: "Build Site"
     runs-on: ubuntu-latest
-    env:
-      OWNER: ${{ needs.check-input.outputs.owner }}
-      REPO: ${{ needs.check-input.outputs.name }}
     outputs:
       success: ${{ steps.result.outputs.success }}
     container:
@@ -129,10 +129,7 @@ jobs:
   push-site:
     name: "Push Site"
     runs-on: ubuntu-latest
-    env:
-      OWNER: ${{ needs.check-input.outputs.owner }}
-      REPO: ${{ needs.check-input.outputs.name }}
-    needs: [check-input, build-site]
+    needs: [build-site]
     steps:
       - id: id
         name: "setup run variables"
