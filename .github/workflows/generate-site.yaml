@@ -43,10 +43,10 @@ jobs:
         run: |
           owner=${{ inputs.owner }}
           name=${{ inputs.name }}
-          if [[ -z "$owner" && -z "$name" ]]; then
-            owner=${{ fromJSON(inputs.repos)[0].owner }}
-            name=${{ fromJSON(inputs.repos)[0].name }}
-          fi
+          # if [[ -z "$owner" && -z "$name" ]]; then
+          #   owner=${{ fromJSON(inputs.repos)[0].owner }}
+          #   name=${{ fromJSON(inputs.repos)[0].name }}
+          # fi
           echo "owner=$owner" >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
   build-site:
