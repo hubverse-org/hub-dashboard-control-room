@@ -1,9 +1,18 @@
 name: "Generate Static Site"
+defaults:
+  run:
+    shell: bash
 on:
   workflow_call:
     inputs:
       repos:
-        required: true
+        required: false
+        type: string
+      owner:
+        required: false
+        type: string
+      name:
+        required: false
         type: string
       slug:
         required: true
@@ -11,6 +20,10 @@ on:
       email:
         required: true
         type: string
+      publish:
+        required: false
+        type: boolean
+        default: true
     secrets:
       id:
         required: true
@@ -18,15 +31,33 @@ on:
         required: true
 
 jobs:
+  check-input:
+    name: "Check Input"
+    runs-on: ubuntu-latest
+    outputs:
+      owner: ${{ steps.check.outputs.owner }}
+      name: ${{ steps.check.outputs.name }}
+    steps:
+      - id: check
+        name: "Check input values"
+        run: |
+          owner=${{ inputs.owner }}
+          name=${{ inputs.name }}
+          if [[ -z "$owner" && -z "$name" ]]; then
+            owner=${{ fromJSON(inputs.repos)[0].owner }}
+            name=${{ fromJSON(inputs.repos)[0].name }}
+          fi
+          echo "owner=$owner" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
   build-site:
+    needs: [check-input]
     name: "Build Site"
     runs-on: ubuntu-latest
-    continue-on-error: true
+    env:
+      OWNER: ${{ needs.check-input.outputs.owner }}
+      REPO: ${{ needs.check-input.outputs.name }}
     outputs:
       success: ${{ steps.result.outputs.success }}
-    strategy: 
-      matrix: 
-        site: ${{ fromJSON(inputs.repos) }}
     container:
       image: ghcr.io/hubverse-org/hub-dash-site-builder:main
       ports:
@@ -52,13 +83,13 @@ jobs:
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
-          owner: ${{ matrix.site.owner }}
-          repositories: ${{ matrix.site.name }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
       - id: id
         name: "setup run variables"
         run: |
-          owner="${{ matrix.site.owner }}"
-          name="${{ matrix.site.name }}"
+          owner="${{ env.OWNER }}"
+          name="${{ env.REPO }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
       - id: checkout
@@ -85,39 +116,33 @@ jobs:
         name: "Render Website"
         run: |
           bash /render.sh \
-            "${{ matrix.site.owner }}" \
-            "${{ matrix.site.name }}" \
+            "${{ env.OWNER }}" \
+            "${{ env.REPO }}" \
             "ptc/data" \
             "" \
             "${{ steps.check-configs.outputs.forecasts }}" \
           && echo "success=true" >> $GITHUB_OUTPUT \
           || echo "success=false" >> $GITHUB_OUTPUT
       - name: Upload artifact
-        # if: ${{ fromJSON(steps.build-site.outputs.success) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
           path: '/site/pages/'
           retention-days: 1
-      # - name: signal success
-      #   # if: ${{ fromJSON(steps.build-site.outputs.success) }}
-      #   run: |
-      #     touch "${{runner.temp}}/${{steps.id.outputs.file}}.success" 
   push-site:
     name: "Push Site"
     runs-on: ubuntu-latest
-    needs: [build-site]
-    continue-on-error: true
-    strategy:
-      matrix:
-        site: ${{ fromJSON(inputs.repos) }}
+    env:
+      OWNER: ${{ needs.check-input.outputs.owner }}
+      REPO: ${{ needs.check-input.outputs.name }}
+    needs: [check-input, build-site]
     steps:
       - id: id
         name: "setup run variables"
         run: |
-          owner="${{ matrix.site.owner }}"
-          name="${{ matrix.site.name }}"
+          owner="${{ env.OWNER }}"
+          name="${{ env.REPO }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
           if [[ -f "${{runner.temp}}/$owner-$name-site.success" ]];
@@ -150,9 +175,10 @@ jobs:
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
-          owner: ${{ matrix.site.owner }}
-          repositories: ${{ matrix.site.name }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
       - id: check-branch
+        if: ${{ fromJSON(inputs.publish) }}
         name: "check for gh-pages branch and create if needed"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
@@ -164,6 +190,7 @@ jobs:
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-pages
+        if: ${{ fromJSON(inputs.publish) }}
         name: "Fetch ${{ steps.id.outputs.repo }}"
         uses: actions/checkout@v4
         with:
@@ -173,11 +200,13 @@ jobs:
           path: 'pages'
           token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
+        if: ${{ fromJSON(inputs.publish) }}
         name: "Load changes"
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
       - id: publish
+        if: ${{ fromJSON(inputs.publish) }}
         name: "Publish site"
         run: |
           bash -x "${{ github.workspace }}/scripts/pushit.sh" \
