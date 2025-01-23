@@ -35,20 +35,6 @@ env:
   REPO: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
 
 jobs:
-  check-input:
-    name: "Check Input"
-    runs-on: ubuntu-latest
-    outputs:
-      owner: ${{ steps.check.outputs.owner }}
-      name: ${{ steps.check.outputs.name }}
-    steps:
-      - id: check
-        name: "Check input values"
-        run: |
-          echo 'owner=${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}' >> "$GITHUB_OUTPUT"
-
-          echo 'name=${{ inputs.name || fromJSON(inputs.repos)[0].name }}' >> "$GITHUB_OUTPUT"
-
   build-site:
     name: "Build Site"
     runs-on: ubuntu-latest
