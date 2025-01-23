@@ -41,10 +41,8 @@ jobs:
       - id: check
         name: "Check input values"
         run: |
-          owner=${{ inputs.owner }}
-          name=${{ inputs.name }}
-          oldrepos=${{ contains(inputs.repos, 'repos') && fromJSON(inputs.repos)[0].repos }}
-          oldowner=${{ contains(inputs.repos, 'owner') && fromJSON(inputs.repos)[0].owner }}
+          owner=${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
+          name=${{ inputs.name || fromJSON(inputs.repos)[0].name }}
           echo "owner=$owner" >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
   build-site:
