@@ -43,8 +43,8 @@ jobs:
         run: |
           owner=${{ inputs.owner }}
           name=${{ inputs.name }}
-          oldrepos=${{ fromJSON(inputs.repos || [])[0].name }}
-          oldowner=${{ fromJSON(inputs.repos || [])[0].owner }}
+          oldrepos=${{ contains(inputs.repos, 'repos') && fromJSON(inputs.repos)[0].repos }}
+          oldowner=${{ contains(inputs.repos, 'owner') && fromJSON(inputs.repos)[0].owner }}
           echo "owner=$owner" >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
   build-site:
