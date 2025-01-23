@@ -39,6 +39,8 @@ jobs:
     name: "Build Site"
     runs-on: ubuntu-latest
     outputs:
+      owner: ${{ steps.id.outputs.owner }}
+      name: ${{ steps.id.outputs.name }}
       success: ${{ steps.build-site.outputs.success }}
       is-bot: ${{ steps.is-bot.outputs.bot }}
     container:
@@ -73,6 +75,8 @@ jobs:
         run: |
           owner="${{ env.OWNER }}"
           name="${{ env.REPO }}"
+          echo "owner=$owner" >> $GITHUB_OUTPUT
+          echo "name=$name" >> $GITHUB_OUTPUT
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
       - id: checkout
@@ -121,9 +125,9 @@ jobs:
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.is-bot) }}
       branch: "gh-pages"
-      artifact: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}-${{ inputs.name || fromJSON(inputs.repos)[0].name }}-site
-      owner: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
-      name: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
+      artifact: ${{ needs.build-site.outputs.owner }}-${{ needs.build-site.outputs.name }}-site
+      owner: ${{ needs.build-site.outputs.owner }}
+      name: ${{ needs.build-site.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
