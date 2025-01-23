@@ -123,7 +123,7 @@ jobs:
     if: ${{ inputs.publish && fromJSON(needs.build-site.outputs.success) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
-      is_bot: ${{ fromJSON(needs.build-outputs.is-bot) }}
+      is_bot: ${{ fromJSON(needs.build-site.outputs.is-bot) }}
       branch: "gh-pages"
       artifact: ${{ needs.build-site.outputs.owner }}-${{ needs.build-site.outputs.name }}-site
       owner: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
