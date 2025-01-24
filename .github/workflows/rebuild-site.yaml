@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Publish Site"
+        description: "Publish Site (uncheck for a dry run)"
         type: boolean
         required: false
         default: false
