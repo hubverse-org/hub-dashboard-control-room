@@ -7,7 +7,7 @@ email="${4:-missing}"
 token="${5:-missing}"
 
 
-exists=$(gh api -X GET "repos/${repo}/branches" --jq '.[].name | select(. == '"${branch}"')')
+exists=$(gh api -X GET "repos/${repo}/branches" --jq ".[].name | select(. == '${branch}')")
 if [[ "$exists" != "${branch}" ]]; then
   tmp=$(mktemp --directory)
   cd "$tmp"
