@@ -19,8 +19,7 @@
 #
 #   Before this script is run, you must have the following in place:
 #
-#   1. a local clone of <repo>@<branch> in a directory called either "pages"
-#      (for branch=gh-pages) or "data" for others
+#   1. a local clone of <repo>@<branch> in a directory called "data"
 #   2. output of a previous build process _in the current working directory_.
 #
 branch="${1:-'gh-pages'}"
