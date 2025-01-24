@@ -41,7 +41,6 @@ token="${5:-missing}"
 case "$branch" in
   "gh-pages")
     # The gh-pages branch hosts the website and will always be overwritten
-    dir="pages"
     msg="deploy"
     amend=true
     to_copy=("_site/*" ".nojekyll")
@@ -49,14 +48,12 @@ case "$branch" in
     ;;
   "ptc/data")
     # ptc/data hosts the forecast data for the predtimechart visualization
-    dir="data"
     msg="update data"
     amend=false
     to_copy=("forecasts" "targets" "predtimechart-options.json")
     ;;
   "predevals/data")
     # predevals/data hosts the scores data for the predevals visualization
-    dir="data"
     msg="update data"
     amend=false
     to_copy=("scores" "predevals-options.json")
@@ -67,6 +64,7 @@ case "$branch" in
     ;;
 esac
 
+dir=data
 # STEP 1: enter directory and set up git credentials
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
 git config --global user.name "${slug}"
