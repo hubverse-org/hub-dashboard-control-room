@@ -119,6 +119,7 @@ jobs:
           path: '/site/pages/'
           retention-days: 1
   push-site:
+    name: "Push Site"
     needs: [build-site]
     if: ${{ inputs.publish && fromJSON(needs.build-site.outputs.success) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/move-matrix/14
