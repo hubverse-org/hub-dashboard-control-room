@@ -34,7 +34,7 @@ jobs:
       name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
-      publish: ${{ inputs.publish == true || true }}
+      publish: ${{ inputs.publish != false }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
