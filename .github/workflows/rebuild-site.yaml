@@ -6,7 +6,7 @@ on:
         description: "Publish Site (uncheck for a dry run)"
         type: boolean
         required: false
-        default: false
+        default: true
 
   repository_dispatch:
     types: ["site"]
@@ -30,7 +30,7 @@ jobs:
       name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
-      publish: ${{ inputs.publish }}
+      publish: ${{ inputs.publish || true }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
