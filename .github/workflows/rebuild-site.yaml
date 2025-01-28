@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@znk/move-matrix/14
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@main
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'

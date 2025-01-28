@@ -122,7 +122,7 @@ jobs:
     name: "Push Site"
     needs: [build-site]
     if: ${{ inputs.publish && fromJSON(needs.build-site.outputs.success) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@znk/move-matrix/14
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.build-site.outputs.is-bot) }}
       branch: "gh-pages"
