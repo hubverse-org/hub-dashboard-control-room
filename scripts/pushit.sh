@@ -19,8 +19,7 @@
 #
 #   Before this script is run, you must have the following in place:
 #
-#   1. a local clone of <repo>@<branch> in a directory called either "pages"
-#      (for branch=gh-pages) or "data" for others
+#   1. a local clone of <repo>@<branch> in a directory called "data"
 #   2. output of a previous build process _in the current working directory_.
 #
 branch="${1:-'gh-pages'}"
@@ -31,9 +30,8 @@ token="${5:-missing}"
 
 # There are currently three branches that this script knows what to do with.
 #
-# There are four variables that we set based on the branches:
+# There are three variables that we set based on the branches:
 #
-#  - dir      the directory of the cloned branch
 #  - msg      the commit message
 #  - amend    a boolean that indicates if the commit should be amended (for
 #               sites) or not (for data)
@@ -41,7 +39,6 @@ token="${5:-missing}"
 case "$branch" in
   "gh-pages")
     # The gh-pages branch hosts the website and will always be overwritten
-    dir="pages"
     msg="deploy"
     amend=true
     to_copy=("_site/*" ".nojekyll")
@@ -49,15 +46,13 @@ case "$branch" in
     ;;
   "ptc/data")
     # ptc/data hosts the forecast data for the predtimechart visualization
-    dir="data"
-    msg="update data"
+    msg="update forecast data"
     amend=false
     to_copy=("forecasts" "targets" "predtimechart-options.json")
     ;;
   "predevals/data")
     # predevals/data hosts the scores data for the predevals visualization
-    dir="data"
-    msg="update data"
+    msg="update score data"
     amend=false
     to_copy=("scores" "predevals-options.json")
     ;;
@@ -67,6 +62,7 @@ case "$branch" in
     ;;
 esac
 
+dir="data"
 # STEP 1: enter directory and set up git credentials
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
 git config --global user.name "${slug}"

@@ -1,6 +1,13 @@
 name: "Rebuild Site"
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish Site (uncheck for a dry run)"
+        type: boolean
+        required: false
+        default: true
+
   repository_dispatch:
     types: ["site"]
 
@@ -14,11 +21,16 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@main
     with:
-      repos: '${{ needs.repos.outputs.repos }}'
+      owner: '${{ matrix.site.owner }}'
+      name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
+      publish: ${{ inputs.publish || true }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
