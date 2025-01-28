@@ -34,7 +34,7 @@ jobs:
       name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
-      publish: ${{ inputs.publish }}
+      publish: ${{ inputs.publish || github.event_name != "workflow_dispatch" }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
