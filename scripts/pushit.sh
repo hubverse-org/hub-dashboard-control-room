@@ -30,9 +30,8 @@ token="${5:-missing}"
 
 # There are currently three branches that this script knows what to do with.
 #
-# There are four variables that we set based on the branches:
+# There are three variables that we set based on the branches:
 #
-#  - dir      the directory of the cloned branch
 #  - msg      the commit message
 #  - amend    a boolean that indicates if the commit should be amended (for
 #               sites) or not (for data)
@@ -47,13 +46,13 @@ case "$branch" in
     ;;
   "ptc/data")
     # ptc/data hosts the forecast data for the predtimechart visualization
-    msg="update data"
+    msg="update forecast data"
     amend=false
     to_copy=("forecasts" "targets" "predtimechart-options.json")
     ;;
   "predevals/data")
     # predevals/data hosts the scores data for the predevals visualization
-    msg="update data"
+    msg="update score data"
     amend=false
     to_copy=("scores" "predevals-options.json")
     ;;
