@@ -63,7 +63,7 @@ case "$branch" in
     ;;
 esac
 
-dir=data
+dir="data"
 # STEP 1: enter directory and set up git credentials
 cd "$dir" || (echo "Directory '$dir' not found" && exit 1)
 git config --global user.name "${slug}"
