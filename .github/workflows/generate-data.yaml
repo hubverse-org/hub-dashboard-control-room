@@ -6,7 +6,13 @@ on:
   workflow_call:
     inputs:
       repos:
-        required: true
+        required: false
+        type: string
+      owner:
+        required: false
+        type: string
+      name:
+        required: false
         type: string
       slug:
         required: true
@@ -16,20 +22,39 @@ on:
         type: string
       regenerate:
         default: false
-        required: false
+        required: true
         type: boolean
+      build:
+        default: "both"
+        required: false
+        type: string
     secrets:
       id:
         required: true
       key:
         required: true
 
+env:
+  OWNER: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
+  REPO: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
+
 jobs:
   check:
-    name: "Check Bot Status"
+    name: "Setup"
     runs-on: ubuntu-latest
+    env:
+      KEY: ${{ env.OWNER }}-${{ env.REPO }}
     outputs:
       exists: ${{ steps.bot.outputs.bot }}
+      owner: ${{ steps.id.outputs.owner }}
+      name: ${{ steps.id.outputs.name }}
+      repo: ${{ steps.id.outputs.repo }}
+      key: ${{ steps.id.outputs.key }}
+      hub: ${{ steps.get-hub-name.outputs.hub }}
+      eval-art: ${{ steps.id.outputs.eval-art }}
+      forecast-art: ${{ steps.id.outputs.forecast-art }}
+      predevals-ok: ${{ steps.check-status.outputs.predevals-ok }}
+      ptc-ok: ${{ steps.check-status.outputs.ptc-ok }}
     steps:
       - id: bot
         name: "Check if we are running a bot"
@@ -40,18 +65,76 @@ jobs:
             bot=true
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
+      - id: "Setup run variables"
+        run: |
+          # if [[ -n "${{ inputs.build }}" ]]; then
+          #   echo "build=${{ inputs.build }}" >> $GITHUB_OUTPUT
+          # else
+          #   echo "build=both" >> $GITHUB_OUTPUT
+          # fi
+          owner="${{ env.OWNER }}"
+          name="${{ env.REPO }}"
+          echo "owner=$owner" >> $GITHUB_OUTPUT
+          echo "name=$name" >> $GITHUB_OUTPUT
+          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+          echo "eval-art=${{ env.KEY }}-predevals-data" >> $GITHUB_OUTPUT
+          echo "forecast-art=${{ env.KEY }}-ptc-data" >> $GITHUB_OUTPUT
+          echo "key=${{ env.KEY }}" >> $GITHUB_OUTPUT
+      - uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
+      - id: checkout-config
+        name: "Fetch config files"
+        uses: actions/download-artifact@v4
+        with:
+          persist-credentials: false
+          token: ${{ steps.token.outputs.token || secrets.key }}
+          repository: ${{ needs.check.outputs.repo }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            predtimechart-config.yml
+            predevals-config.yml
+            site-config.yml
+          path: 'cfg/'
+      - id: get-hub-name
+        name: "Get information about hub"
+        run: |
+          yq eval '.hub' cfg/site-config.yml \
+          | sed -E -e 's+(https://github.com/|^)+hub=+' \
+          | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
+      - id: status-check
+        name: "Check if we need to build data"
+        run: |
+          repo=${{ needs.check.outputs.repo }}
+          if [[ ! -f cfg/predevals-config.yml ]]; then
+            echo "predevals-ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=$repo: No evals to build::No predevals-config.yml file found."
+          else
+            echo "predevals-ok=true" >> $GITHUB_OUTPUT
+          fi
+          if [[ ! -f cfg/predtimechart-config.yml ]]; then
+            echo "ptc-ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=$repo: No forecasts to build::No predtimechart-config.yml file found."
+          else
+            echo "ptc-ok=true" >> $GITHUB_OUTPUT
+          fi
+      - name: Upload artifact
+        if: ${{ fromJSON(steps.status-check.outputs.ptc-ok) || fromJSON(steps.status-check.outputs.predevals-ok) }}
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.KEY }}-cfg
+          path: 'cfg/'
+
   build-evals:
     needs: [check]
+    if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
     name: "Generate Eval Page Data"
     runs-on: ubuntu-latest
-    continue-on-error: true
-    outputs:
-      ok: ${{ fromJSON(steps.status-check.outputs.ok) }}
-    env:
-      KEY: ${{ matrix.site.owner }}-${{ matrix.site.name }}
-    strategy:
-      matrix:
-        site: ${{ fromJSON(inputs.repos) }}
     container:
       image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
       ports:
@@ -59,65 +142,24 @@ jobs:
       volumes:
         - ${{ github.workspace }}:/project
     steps:
-      - id: id
-        name: "setup run variables"
-        run: |
-          if [[ -n "${{ matrix.site.build }}" ]]; then
-            echo "build=${{ matrix.site.build }}" >> $GITHUB_OUTPUT
-          else
-            echo "build=both" >> $GITHUB_OUTPUT
-          fi
-          owner="${{ matrix.site.owner }}"
-          name="${{ matrix.site.name }}"
-          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-predevals-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
-        if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
-          owner: ${{ matrix.site.owner }}
-          repositories: ${{ matrix.site.name }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/checkout@v4
+        uses: actions/download-artifact@v4
         with:
-          persist-credentials: false
-          token: ${{ steps.token.outputs.token || secrets.key }}
-          repository: ${{ steps.id.outputs.repo }}
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            predevals-config.yml
-            site-config.yml
-      - id: status-check
-        name: "Check if we need to build data"
-        run: |
-          if [[ ! -f predevals-config.yml ]]; then
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-            repo=${{ steps.id.outputs.repo }}
-            echo "::notice title=Missing config ($repo)::No predevals-config.yml file found. Exiting."
-            exit 0
-          fi
-          file=predevals-${{ env.KEY }}
-          touch "$file"
-          {
-            echo '${{ toJSON(matrix.site) }}'
-          } > "$file"
-          echo "ok=true" >> $GITHUB_OUTPUT
-      - id: upload-status
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: predevals-${{ env.KEY }}
-          path: predevals-${{ env.KEY }}
+          name: ${{ needs.check.outputs.key }}-cfg
       - id: check-branch
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "check for predevals/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
-          exists=$(curl -sSL "https://api.github.com/repos/${{ steps.id.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
+          exists=$(curl -sSL "https://api.github.com/repos/${{ needs.check.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
           if [[ "$exists" = "predevals/data" ]]; then
             fetch=true
           else
@@ -125,132 +167,73 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ fromJSON(steps.status-check.outputs.ok) && fromJSON(steps.check-branch.outputs.fetch) }}
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout predevals/data branch"
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
-          repository: ${{ steps.id.outputs.repo }}
+          repository: ${{ needs.check.outputs.repo }}
           ref: 'predevals/data'
           path: 'out'
-      - id: get-repo-name
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        name: "Get information about hub"
-        run: |
-          mkdir -p out/
-          yq eval '.hub' site-config.yml \
-          | sed -E -e 's+(https://github.com/|^)+repo=+' \
-          | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: clone-repo
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
+        name: "Fetch ${{ needs.check.outputs.hub }}"
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          repository: ${{ steps.get-repo-name.outputs.repo }}
+          repository: ${{ needs.check.outputs.hub }}
           path: 'repo'
       - id: build-targets
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Generate scores data"
         run: |
-          prefix="https://raw.githubusercontent.com/${{ steps.id.outputs.repo }}/refs/heads"
+          mkdir -p out/
+          prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
           oracle="${prefix}/oracle-data/oracle-output.csv"
           create-predevals-data.R \
           -h repo \
-          -c predevals-config.yml \
+          -c cfg/predevals-config.yml \
           -d $oracle \
           -o out
       - name: Upload artifact
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.id.outputs.file }}
+          name: ${{ needs.check.outputs.eval-art }}
           path: 'out/'
   build-forecasts:
     needs: [check]
+    if: ${{ fromJSON(needs.check.outputs.ptc-ok) }}
     name: "Generate Forecast Page Data"
     runs-on: ubuntu-latest
-    continue-on-error: true
-    outputs:
-      ok: ${{ fromJSON(steps.status-check.outputs.ok) }}
-    env:
-      KEY: ${{ matrix.site.owner }}-${{ matrix.site.name }}
-    strategy:
-      matrix:
-        site: ${{ fromJSON(inputs.repos) }}
     steps:
-      - id: id
-        name: "setup run variables"
-        run: |
-          if [[ -n "${{ matrix.site.build }}" ]]; then
-            echo "build=${{ matrix.site.build }}" >> $GITHUB_OUTPUT
-          else
-            echo "build=both" >> $GITHUB_OUTPUT
-          fi
-          owner="${{ matrix.site.owner }}"
-          name="${{ matrix.site.name }}"
-          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "file=$owner-$name-ptc-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
-          owner: ${{ matrix.site.owner }}
-          repositories: ${{ matrix.site.name }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/checkout@v4
+        uses: actions/download-artifact@v4
         with:
-          persist-credentials: false
-          token: ${{ steps.token.outputs.token || secrets.key }}
-          repository: ${{ steps.id.outputs.repo }}
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            predtimechart-config.yml
-            site-config.yml
-      - id: status-check
-        name: "Check if we need to build data"
-        run: |
-          if [[ ! -f predtimechart-config.yml ]]; then
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-            repo=${{ steps.id.outputs.repo }}
-            echo "::notice title=Missing config ($repo)::No predtimechart-config.yml file found. Exiting."
-            exit 0
-          fi
-          file=ptc-${{ env.KEY }}
-          touch "$file"
-          {
-            echo '${{ toJSON(matrix.site) }}'
-          } > "$file"
-          echo "ok=true" >> $GITHUB_OUTPUT
+          name: ${{ needs.check.outputs.key }}-cfg
       - id: setup-snake
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
       - id: install-predtimechart-tool
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "Install predtimechart conversion tool"
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
-      - id: upload-status
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ptc-${{ env.KEY }}
-          path: ptc-${{ env.KEY }}
       - id: check-branch
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         name: "check for ptc/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
-        run: | 
-          exists=$(gh api -X GET "repos/${{ steps.id.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
+        run: |
+          exists=$(gh api -X GET "repos/${{ needs.check.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
           if [[ "$exists" = "ptc/data" ]]; then
             fetch=true
           else
@@ -258,44 +241,38 @@ jobs:
           fi
           echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
       - id: checkout-data
-        if: ${{ fromJSON(steps.status-check.outputs.ok) && fromJSON(steps.check-branch.outputs.fetch) }}
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
         uses: actions/checkout@v4
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
-          repository: ${{ steps.id.outputs.repo }}
+          repository: ${{ needs.check.outputs.repo }}
           ref: 'ptc/data'
           path: 'out'
-      - id: get-repo-name
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        name: "Get information about hub"
-        run: |
-          mkdir -p out/targets/
-          mkdir -p out/forecasts/
-          yq eval '.hub' site-config.yml \
-          | sed -E -e 's+(https://github.com/|^)+repo=+' \
-          | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: clone-repo
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
-        name: "Fetch ${{ steps.get-repo-name.outputs.repo }}"
+        name: "Fetch ${{ needs.check.outputs.hub }}"
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          repository: ${{ steps.get-repo-name.outputs.repo }}
+          repository: ${{ needs.check.outputs.hub }}
           path: 'repo'
       - id: build-targets
         name: "Generate target data"
-        if: ${{ fromJSON(steps.status-check.outputs.ok) && steps.id.outputs.build == 'both' || steps.id.outputs.build == 'target' }}
+        if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
         run: |
+          mkdir -p out/targets/
+          mkdir -p out/forecasts/
           ptc_generate_target_json_files \
             repo \
             predtimechart-config.yml \
             out/targets
       - id: json-lives
-        if: ${{ fromJSON(steps.status-check.outputs.ok) && steps.id.outputs.build == 'both' || steps.id.outputs.build == 'forecast' }}
+        if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
         name: "Generate forecast data"
         run: |
+          mkdir -p out/targets/
+          mkdir -p out/forecasts/
           if [[ ${{ inputs.regenerate }} == 'true' ]]; then
             ptc_generate_json_files \
               repo \
@@ -311,51 +288,34 @@ jobs:
               out/forecasts
           fi
       - name: Upload artifact
-        if: ${{ fromJSON(steps.status-check.outputs.ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.id.outputs.file }}
+          name: ${{ needs.check.outputs.forecast-art }}
           path: 'out/'
-  check-forecasts:
-    needs: [build-forecasts]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@main
-    with:
-      artifact: "ptc-*"
   push-ptc-data:
-    needs: [check, check-forecasts]
-    if: ${{ needs.check-forecasts.outputs.process }}
+    needs: [check, build-forecasts]
+    if: ${{ needs.check.outputs.ptc-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
-    strategy:
-      matrix:
-        site: ${{ fromJSON(needs.check-forecasts.outputs.matrix) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "ptc/data"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-ptc-data
-      owner: ${{ matrix.site.owner }}
-      name: ${{ matrix.site.name }}
+      artifact: ${{ needs.check.outputs.forecast-art }}
+      owner: ${{ needs.check.outputs.owner }}
+      name: ${{ needs.check.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
-  check-predevals:
-    needs: [build-evals]
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/filter-matrix.yaml@main
-    with:
-      artifact: "predevals-*"
   push-predevals-data:
-    needs: [check, check-predevals]
-    if: ${{ needs.check-predevals.outputs.process }}
+    needs: [check, build-predevals]
+    if: ${{ needs.check.outputs.predeval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
-    strategy:
-      matrix:
-        site: ${{ fromJSON(needs.check-predevals.outputs.matrix) }}
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
       branch: "predevals/data"
-      artifact: ${{ matrix.site.owner }}-${{ matrix.site.name }}-predevals-data
-      owner: ${{ matrix.site.owner }}
-      name: ${{ matrix.site.name }}
+      artifact: ${{ needs.check.outputs.eval-art }}
+      owner: ${{ needs.check.outputs.owner }}
+      name: ${{ needs.check.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
