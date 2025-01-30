@@ -33,6 +33,7 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
+    continue-on-error: true
     strategy:
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}

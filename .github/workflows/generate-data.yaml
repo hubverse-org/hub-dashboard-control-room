@@ -168,6 +168,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.check.outputs.key }}-cfg
+          path: 'cfg'
       - id: check-branch
         name: "check for predevals/data branch"
         env:
@@ -200,6 +201,7 @@ jobs:
       - id: build-targets
         name: "Generate scores data"
         run: |
+          ls -larth
           mkdir -p out/
           prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
           oracle="${prefix}/oracle-data/oracle-output.csv"
@@ -233,6 +235,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.check.outputs.key }}-cfg
+          path: 'cfg'
       - id: setup-snake
         uses: actions/setup-python@v5
         with:
@@ -275,6 +278,7 @@ jobs:
         name: "Generate target data"
         if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
         run: |
+          ls -larth
           mkdir -p out/targets/
           mkdir -p out/forecasts/
           ptc_generate_target_json_files \
@@ -285,6 +289,7 @@ jobs:
         if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
         name: "Generate forecast data"
         run: |
+          ls -larth
           mkdir -p out/targets/
           mkdir -p out/forecasts/
           if [[ ${{ inputs.regenerate }} == 'true' ]]; then
