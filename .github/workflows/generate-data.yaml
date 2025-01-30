@@ -44,7 +44,6 @@ env:
 
 jobs:
   check:
-    continue-on-error: true
     name: "Setup"
     runs-on: ubuntu-latest
     outputs:
