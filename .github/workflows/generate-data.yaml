@@ -191,11 +191,11 @@ jobs:
           ls -larth
           mkdir -p out/
           prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-          if [[ '${{ needs.check.outputs.repo }}' == 'reichlab/flusight-dashboard' ]]; then
-            oracle="https://raw.githubusercontent.com/reichlab/flusight-dashboard/72dc5d9aa90043a00e3ea6a91fcb3628ab031bee/oracle-output.csv"
-          else
+          # if [[ '${{ needs.check.outputs.repo }}' == 'reichlab/flusight-dashboard' ]]; then
+          #   oracle="https://raw.githubusercontent.com/reichlab/flusight-dashboard/72dc5d9aa90043a00e3ea6a91fcb3628ab031bee/oracle-output.csv"
+          # else
             oracle="${prefix}/oracle-data/oracle-output.csv"
-          fi
+          # fi
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
