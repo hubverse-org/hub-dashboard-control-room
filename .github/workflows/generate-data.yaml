@@ -122,7 +122,7 @@ jobs:
           else
             echo "forecast-ok=true" >> $GITHUB_OUTPUT
           fi
-      - name: Upload artifact
+      - name: "Save config files"
         if: ${{ fromJSON(steps.status.outputs.forecast-ok) || fromJSON(steps.status.outputs.eval-ok) }}
         id: upload
         uses: actions/upload-artifact@v4
@@ -156,7 +156,7 @@ jobs:
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: check-branch
-        name: "check for predevals/data branch"
+        name: "Verify existence of predevals/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: | 
@@ -191,17 +191,13 @@ jobs:
           ls -larth
           mkdir -p out/
           prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-          # if [[ '${{ needs.check.outputs.repo }}' == 'reichlab/flusight-dashboard' ]]; then
-          #   oracle="https://raw.githubusercontent.com/reichlab/flusight-dashboard/72dc5d9aa90043a00e3ea6a91fcb3628ab031bee/oracle-output.csv"
-          # else
-            oracle="${prefix}/oracle-data/oracle-output.csv"
-          # fi
+          oracle="${prefix}/oracle-data/oracle-output.csv"
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
           -d $oracle \
           -o out
-      - name: Upload artifact
+      - name: "Save scores data artifact"
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -227,6 +223,7 @@ jobs:
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: setup-snake
+        name: "Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
@@ -236,7 +233,7 @@ jobs:
           pip install --upgrade pip
           pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
       - id: check-branch
-        name: "check for ptc/data branch"
+        name: "Validate existence of ptc/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
         run: |
@@ -296,7 +293,7 @@ jobs:
               out/predtimechart-options.json \
               out/forecasts
           fi
-      - name: Upload artifact
+      - name: "Save forecast data artifact"
         id: upload
         uses: actions/upload-artifact@v4
         with:
