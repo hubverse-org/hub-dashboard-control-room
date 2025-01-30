@@ -81,6 +81,7 @@ jobs:
           echo "forecast-art=$key-forecast-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         id: token
+        if: ${{ fromJSON(steps.bot.outputs.bot) }}
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
@@ -143,6 +144,7 @@ jobs:
     steps:
       - uses: actions/create-github-app-token@v1
         id: token
+        if: ${{ needs.check.outputs.exists }}
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
