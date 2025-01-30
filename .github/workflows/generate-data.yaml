@@ -42,8 +42,6 @@ jobs:
   check:
     name: "Setup"
     runs-on: ubuntu-latest
-    env:
-      KEY: ${{ env.OWNER }}-${{ env.REPO }}
     outputs:
       exists: ${{ steps.bot.outputs.bot }}
       owner: ${{ steps.id.outputs.owner }}
@@ -74,12 +72,13 @@ jobs:
           # fi
           owner="${{ env.OWNER }}"
           name="${{ env.REPO }}"
+          key="${{ env.OWNER}}-${{ env.REPO }}"
           echo "owner=$owner" >> $GITHUB_OUTPUT
           echo "name=$name" >> $GITHUB_OUTPUT
+          echo "key=$key" >> $GITHUB_OUTPUT
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "eval-art=${{ env.KEY }}-predevals-data" >> $GITHUB_OUTPUT
-          echo "forecast-art=${{ env.KEY }}-ptc-data" >> $GITHUB_OUTPUT
-          echo "key=${{ env.KEY }}" >> $GITHUB_OUTPUT
+          echo "eval-art=$key-predevals-data" >> $GITHUB_OUTPUT
+          echo "forecast-art=$key-ptc-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         id: token
         with:
@@ -127,7 +126,7 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.KEY }}-cfg
+          name: ${{ steps.id.outputs.key }}-cfg
           path: 'cfg/'
 
   build-evals:
