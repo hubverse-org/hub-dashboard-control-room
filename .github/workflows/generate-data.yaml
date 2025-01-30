@@ -139,8 +139,14 @@ jobs:
     name: "test"
     runs-on: ubuntu-22.04
     steps:
-      - run: |
+      - name: "Show variables"
+        run: |
           echo '${{ toJSON(needs.check.outputs) }}'
+          if [[ $(grep -c ":)" '${{ toJSON(needs.check.outputs)') -gt 0 ]]; then
+            echo ":guitar:"
+          else
+            echo ":trombone:"
+          fi
   # build-evals:
   #   needs: [check]
   #   if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
