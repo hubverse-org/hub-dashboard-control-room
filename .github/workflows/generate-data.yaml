@@ -137,12 +137,14 @@ jobs:
   test:
     needs: [check]
     name: "test"
+    env:
+      NEEDS: ${{ toJSON(needs.check.outputs) }}
     runs-on: ubuntu-22.04
     steps:
       - name: "Show variables"
         run: |
           echo '${{ toJSON(needs.check.outputs) }}'
-          if [[ $(grep -c ":)" <<< '${{ toJSON(needs.check.outputs) }}') -gt 0 ]]; then
+          if [[ $(grep -c ":)" <<< '${{ env.NEEDS }}') -gt 0 ]]; then
             echo ":guitar:"
           else
             echo ":trombone:"
