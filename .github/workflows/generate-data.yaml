@@ -312,7 +312,7 @@ jobs:
           path: 'out/'
   push-ptc-data:
     needs: [check, build-forecasts]
-    if: ${{ needs.check.outputs.ptc-ok }}
+    if: ${{ inputs.publish && needs.check.outputs.ptc-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
@@ -325,7 +325,7 @@ jobs:
     secrets: inherit
   push-predevals-data:
     needs: [check, build-evals]
-    if: ${{ needs.check.outputs.predeval-ok }}
+    if: ${{ inputs.publish && needs.check.outputs.predeval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
