@@ -51,7 +51,7 @@ jobs:
             if [[ $(grep -c '/' <<< '${{ inputs.repo }}') -gt 0 ]]; then
               echo '${{ inputs.repo }}' \
               | tr ' ' '\n' \
-              | jq -R
+              | jq -R \
               | jq -sc 'map(split("/") | {owner:.[0], name:.[1]})'
             else
               echo '${{ inputs.newbies }}'
