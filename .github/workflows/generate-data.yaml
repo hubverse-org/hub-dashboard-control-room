@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - run: |
-        echo '${{ toJSON(needs.check.outputs) }}'
+          echo '${{ toJSON(needs.check.outputs) }}'
   # build-evals:
   #   needs: [check]
   #   if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
