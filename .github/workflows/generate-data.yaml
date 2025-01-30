@@ -175,7 +175,7 @@ jobs:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
           repository: ${{ needs.check.outputs.repo }}
-          ref: 'predevals/data'
+          ref: ${{ steps.check-branch.outputs.ref }}
           path: 'out'
       - id: clone-repo
         name: "Fetch ${{ needs.check.outputs.hub }}"
@@ -190,7 +190,11 @@ jobs:
           ls -larth
           mkdir -p out/
           prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-          oracle="${prefix}/oracle-data/oracle-output.csv"
+          if [[ '${{ needs.check.outputs.repo }}' == 'reichlab/flusight-dashboard']]; then
+            oracle="${prefix}/72dc5d9aa90043a00e3ea6a91fcb3628ab031bee/oracle-output.csv"
+          else
+            oracle="${prefix}/oracle-data/oracle-output.csv"
+          fi
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
