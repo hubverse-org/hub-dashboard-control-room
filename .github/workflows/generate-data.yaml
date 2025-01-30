@@ -144,192 +144,192 @@ jobs:
       - name: "Show variables"
         run: |
           echo '${{ toJSON(needs.check.outputs) }}'
-  # build-evals:
-  #   needs: [check]
-  #   if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
-  #   name: "Generate Eval Page Data"
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
-  #     ports:
-  #       - 80
-  #     volumes:
-  #       - ${{ github.workspace }}:/project
-  #   steps:
-  #     - uses: actions/create-github-app-token@v1
-  #       id: token
-  #       with:
-  #         app-id: ${{ secrets.id }}
-  #         private-key: ${{ secrets.key }}
-  #         owner: ${{ env.OWNER }}
-  #         repositories: ${{ env.REPO }}
-  #     - id: checkout-config
-  #       name: "Fetch config files"
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ needs.check.outputs.key }}-cfg
-  #     - id: check-branch
-  #       name: "check for predevals/data branch"
-  #       env:
-  #         GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
-  #       run: | 
-  #         exists=$(curl -sSL "https://api.github.com/repos/${{ needs.check.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
-  #         if [[ "$exists" = "predevals/data" ]]; then
-  #           fetch=true
-  #         else
-  #           fetch=false
-  #         fi
-  #         echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
-  #     - id: checkout-data
-  #       if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
-  #       name: "Checkout predevals/data branch"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ steps.token.outputs.token || secrets.key }}
-  #         persist-credentials: false
-  #         repository: ${{ needs.check.outputs.repo }}
-  #         ref: 'predevals/data'
-  #         path: 'out'
-  #     - id: clone-repo
-  #       name: "Fetch ${{ needs.check.outputs.hub }}"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         persist-credentials: false
-  #         repository: ${{ needs.check.outputs.hub }}
-  #         path: 'repo'
-  #     - id: build-targets
-  #       name: "Generate scores data"
-  #       run: |
-  #         mkdir -p out/
-  #         prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-  #         oracle="${prefix}/oracle-data/oracle-output.csv"
-  #         create-predevals-data.R \
-  #         -h repo \
-  #         -c cfg/predevals-config.yml \
-  #         -d $oracle \
-  #         -o out
-  #     - name: Upload artifact
-  #       id: upload
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ needs.check.outputs.eval-art }}
-  #         path: 'out/'
-  # build-forecasts:
-  #   needs: [check]
-  #   if: ${{ fromJSON(needs.check.outputs.ptc-ok) }}
-  #   name: "Generate Forecast Page Data"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/create-github-app-token@v1
-  #       if: ${{ fromJSON(needs.check.outputs.exists) }}
-  #       id: token
-  #       with:
-  #         app-id: ${{ secrets.id }}
-  #         private-key: ${{ secrets.key }}
-  #         owner: ${{ env.OWNER }}
-  #         repositories: ${{ env.REPO }}
-  #     - id: checkout-config
-  #       name: "Fetch config files"
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ needs.check.outputs.key }}-cfg
-  #     - id: setup-snake
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: 3.12
-  #     - id: install-predtimechart-tool
-  #       name: "Install predtimechart conversion tool"
-  #       run: |
-  #         pip install --upgrade pip
-  #         pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
-  #     - id: check-branch
-  #       name: "check for ptc/data branch"
-  #       env:
-  #         GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
-  #       run: |
-  #         exists=$(gh api -X GET "repos/${{ needs.check.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
-  #         if [[ "$exists" = "ptc/data" ]]; then
-  #           fetch=true
-  #         else
-  #           fetch=false
-  #         fi
-  #         echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
-  #     - id: checkout-data
-  #       if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
-  #       name: "Checkout ptc/data branch"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ steps.token.outputs.token || secrets.key }}
-  #         persist-credentials: false
-  #         repository: ${{ needs.check.outputs.repo }}
-  #         ref: 'ptc/data'
-  #         path: 'out'
-  #     - id: clone-repo
-  #       name: "Fetch ${{ needs.check.outputs.hub }}"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         persist-credentials: false
-  #         repository: ${{ needs.check.outputs.hub }}
-  #         path: 'repo'
-  #     - id: build-targets
-  #       name: "Generate target data"
-  #       if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
-  #       run: |
-  #         mkdir -p out/targets/
-  #         mkdir -p out/forecasts/
-  #         ptc_generate_target_json_files \
-  #           repo \
-  #           predtimechart-config.yml \
-  #           out/targets
-  #     - id: json-lives
-  #       if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
-  #       name: "Generate forecast data"
-  #       run: |
-  #         mkdir -p out/targets/
-  #         mkdir -p out/forecasts/
-  #         if [[ ${{ inputs.regenerate }} == 'true' ]]; then
-  #           ptc_generate_json_files \
-  #             repo \
-  #             predtimechart-config.yml \
-  #             out/predtimechart-options.json \
-  #             out/forecasts \
-  #             --regenerate
-  #         else
-  #           ptc_generate_json_files \
-  #             repo \
-  #             predtimechart-config.yml \
-  #             out/predtimechart-options.json \
-  #             out/forecasts
-  #         fi
-  #     - name: Upload artifact
-  #       id: upload
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ needs.check.outputs.forecast-art }}
-  #         path: 'out/'
-  # push-ptc-data:
-  #   needs: [check, build-forecasts]
-  #   if: ${{ needs.check.outputs.ptc-ok }}
-  #   uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
-  #   with:
-  #     is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
-  #     branch: "ptc/data"
-  #     artifact: ${{ needs.check.outputs.forecast-art }}
-  #     owner: ${{ needs.check.outputs.owner }}
-  #     name: ${{ needs.check.outputs.name }}
-  #     slug: ${{ inputs.slug }}
-  #     email: ${{ inputs.email }}
-  #   secrets: inherit
-  # push-predevals-data:
-  #   needs: [check, build-evals]
-  #   if: ${{ needs.check.outputs.predeval-ok }}
-  #   uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
-  #   with:
-  #     is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
-  #     branch: "predevals/data"
-  #     artifact: ${{ needs.check.outputs.eval-art }}
-  #     owner: ${{ needs.check.outputs.owner }}
-  #     name: ${{ needs.check.outputs.name }}
-  #     slug: ${{ inputs.slug }}
-  #     email: ${{ inputs.email }}
-  #   secrets: inherit
+  build-evals:
+    needs: [check]
+    if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
+    name: "Generate Eval Page Data"
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
+      ports:
+        - 80
+      volumes:
+        - ${{ github.workspace }}:/project
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
+      - id: checkout-config
+        name: "Fetch config files"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.check.outputs.key }}-cfg
+      - id: check-branch
+        name: "check for predevals/data branch"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        run: | 
+          exists=$(curl -sSL "https://api.github.com/repos/${{ needs.check.outputs.repo }}/branches" | jq '.[].name | select(. == "predevals/data")')
+          if [[ "$exists" = "predevals/data" ]]; then
+            fetch=true
+          else
+            fetch=false
+          fi
+          echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
+      - id: checkout-data
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
+        name: "Checkout predevals/data branch"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token || secrets.key }}
+          persist-credentials: false
+          repository: ${{ needs.check.outputs.repo }}
+          ref: 'predevals/data'
+          path: 'out'
+      - id: clone-repo
+        name: "Fetch ${{ needs.check.outputs.hub }}"
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ needs.check.outputs.hub }}
+          path: 'repo'
+      - id: build-targets
+        name: "Generate scores data"
+        run: |
+          mkdir -p out/
+          prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
+          oracle="${prefix}/oracle-data/oracle-output.csv"
+          create-predevals-data.R \
+          -h repo \
+          -c cfg/predevals-config.yml \
+          -d $oracle \
+          -o out
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.check.outputs.eval-art }}
+          path: 'out/'
+  build-forecasts:
+    needs: [check]
+    if: ${{ fromJSON(needs.check.outputs.ptc-ok) }}
+    name: "Generate Forecast Page Data"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v1
+        if: ${{ fromJSON(needs.check.outputs.exists) }}
+        id: token
+        with:
+          app-id: ${{ secrets.id }}
+          private-key: ${{ secrets.key }}
+          owner: ${{ env.OWNER }}
+          repositories: ${{ env.REPO }}
+      - id: checkout-config
+        name: "Fetch config files"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.check.outputs.key }}-cfg
+      - id: setup-snake
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - id: install-predtimechart-tool
+        name: "Install predtimechart conversion tool"
+        run: |
+          pip install --upgrade pip
+          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
+      - id: check-branch
+        name: "check for ptc/data branch"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        run: |
+          exists=$(gh api -X GET "repos/${{ needs.check.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
+          if [[ "$exists" = "ptc/data" ]]; then
+            fetch=true
+          else
+            fetch=false
+          fi
+          echo "fetch=$fetch" >> "$GITHUB_OUTPUT"
+      - id: checkout-data
+        if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
+        name: "Checkout ptc/data branch"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token || secrets.key }}
+          persist-credentials: false
+          repository: ${{ needs.check.outputs.repo }}
+          ref: 'ptc/data'
+          path: 'out'
+      - id: clone-repo
+        name: "Fetch ${{ needs.check.outputs.hub }}"
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: ${{ needs.check.outputs.hub }}
+          path: 'repo'
+      - id: build-targets
+        name: "Generate target data"
+        if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
+        run: |
+          mkdir -p out/targets/
+          mkdir -p out/forecasts/
+          ptc_generate_target_json_files \
+            repo \
+            predtimechart-config.yml \
+            out/targets
+      - id: json-lives
+        if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
+        name: "Generate forecast data"
+        run: |
+          mkdir -p out/targets/
+          mkdir -p out/forecasts/
+          if [[ ${{ inputs.regenerate }} == 'true' ]]; then
+            ptc_generate_json_files \
+              repo \
+              predtimechart-config.yml \
+              out/predtimechart-options.json \
+              out/forecasts \
+              --regenerate
+          else
+            ptc_generate_json_files \
+              repo \
+              predtimechart-config.yml \
+              out/predtimechart-options.json \
+              out/forecasts
+          fi
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.check.outputs.forecast-art }}
+          path: 'out/'
+  push-ptc-data:
+    needs: [check, build-forecasts]
+    if: ${{ needs.check.outputs.ptc-ok }}
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
+    with:
+      is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
+      branch: "ptc/data"
+      artifact: ${{ needs.check.outputs.forecast-art }}
+      owner: ${{ needs.check.outputs.owner }}
+      name: ${{ needs.check.outputs.name }}
+      slug: ${{ inputs.slug }}
+      email: ${{ inputs.email }}
+    secrets: inherit
+  push-predevals-data:
+    needs: [check, build-evals]
+    if: ${{ needs.check.outputs.predeval-ok }}
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
+    with:
+      is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
+      branch: "predevals/data"
+      artifact: ${{ needs.check.outputs.eval-art }}
+      owner: ${{ needs.check.outputs.owner }}
+      name: ${{ needs.check.outputs.name }}
+      slug: ${{ inputs.slug }}
+      email: ${{ inputs.email }}
+    secrets: inherit
