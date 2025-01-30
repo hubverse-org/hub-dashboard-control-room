@@ -93,7 +93,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/download-artifact@v4
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           token: ${{ steps.token.outputs.token || secrets.key }}
