@@ -45,7 +45,6 @@ jobs:
       - id: new-repos
         run: |
           {
-            if [[
             echo "new<<EOF"
             echo '${{ env.NEW }}'
             echo "EOF"
