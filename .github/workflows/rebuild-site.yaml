@@ -24,8 +24,7 @@ jobs:
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
-  site:
-    name: "Build Site and Push"
+  run:
     needs: [repos]
     strategy:
       fail-fast: false

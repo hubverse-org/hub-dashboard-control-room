@@ -31,8 +31,7 @@ jobs:
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
-  data:
-    name: "Build Data and Push"
+  run:
     needs: [repos]
     strategy:
       fail-fast: false
