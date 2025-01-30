@@ -144,7 +144,7 @@ jobs:
       - name: "Show variables"
         run: |
           echo '${{ toJSON(needs.check.outputs) }}'
-          if [[ $(grep -c ":)" <<< '${{ env.NEEDS }}') -gt 0 ]]; then
+          if [[ $(grep -c "/" <<< '${{ env.NEEDS }}') -gt 0 ]]; then
             echo ":guitar:"
           else
             echo ":trombone:"
