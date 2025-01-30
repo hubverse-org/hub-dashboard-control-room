@@ -97,7 +97,7 @@ jobs:
         with:
           persist-credentials: false
           token: ${{ steps.token.outputs.token || secrets.key }}
-          repository: ${{ needs.check.outputs.repo }}
+          repository: ${{ steps.id.outputs.repo }}
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             predtimechart-config.yml
@@ -113,7 +113,7 @@ jobs:
       - id: status-check
         name: "Check if we need to build data"
         run: |
-          repo=${{ needs.check.outputs.repo }}
+          repo=${{ steps.id.outputs.repo }}
           if [[ ! -f cfg/predevals-config.yml ]]; then
             echo "predevals-ok=false" >> "$GITHUB_OUTPUT"
             echo "::notice title=$repo: No evals to build::No predevals-config.yml file found."
