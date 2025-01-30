@@ -168,7 +168,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.check.outputs.key }}-cfg
-          path: 'cfg'
       - id: check-branch
         name: "check for predevals/data branch"
         env:
@@ -207,7 +206,7 @@ jobs:
           oracle="${prefix}/oracle-data/oracle-output.csv"
           create-predevals-data.R \
           -h repo \
-          -c cfg/predevals-config.yml \
+          -c predevals-config.yml \
           -d $oracle \
           -o out
       - name: Upload artifact
@@ -235,7 +234,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.check.outputs.key }}-cfg
-          path: 'cfg'
       - id: setup-snake
         uses: actions/setup-python@v5
         with:
