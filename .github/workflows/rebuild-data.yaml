@@ -2,6 +2,11 @@ name: "Rebuild Data"
 on:
   workflow_dispatch:
     inputs:
+      repo:
+        description: "Specific repository to rebuild"
+        type: string
+        required: false
+        default: zkamvar/test-hub-dashboard
       regenerate:
         description: "(Forecast) Regenerate Model Output Data"
         type: boolean
@@ -23,6 +28,7 @@ jobs:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
     with:
       newbies: "${{ toJSON(github.event.client_payload.newbies) }}"
+      repo: ${{ inputs.repo }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}

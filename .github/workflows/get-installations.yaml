@@ -6,6 +6,9 @@ on:
       newbies:
         required: false
         type: string
+      repo:
+        required: false
+        type: string
     secrets:
       id:
         required: true
@@ -42,7 +45,12 @@ jobs:
         run: |
           {
             echo "new<<EOF"
-            echo '${{ inputs.newbies }}'
+            if [[ $(grep -c '/' <<< '${{ inputs.repo }}') -gt 0 ]]; then
+              echo '${{ inputs.repo }}' | \
+              jq -Rc '[. | split("/") | {owner:.[0], repo:.[1]}]'
+            else
+              echo '${{ inputs.newbies }}'
+            fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - id: checkout
