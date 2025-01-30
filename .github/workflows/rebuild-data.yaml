@@ -2,13 +2,8 @@ name: "Rebuild Data"
 on:
   workflow_dispatch:
     inputs:
-      owner:
-        description: "(optional) GitHub username of a dashboard repository"
-        type: string
-        required: false
-        default: null
-      name:
-        description: "(optional) name of GitHub dashboard repository"
+      repo:
+        description: "(optional) dashboard repository"
         type: string
         required: false
         default: null
@@ -30,9 +25,10 @@ on:
 
 jobs:
   repos:
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
+    uses: .github/workflows/get-installations.yaml
     with:
-      newbies: "${{ toJSON(github.event.client_payload.newbies || format('[{{\"owner\": {}, \"name\": {}}} }}]', inputs.owner, inputs.name)) }}"
+      newbies: "${{ toJSON(github.event.client_payload.newbies) }}"
+      repo: "${{ toJSON(inputs.repo) }}"
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}

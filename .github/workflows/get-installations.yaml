@@ -31,6 +31,7 @@ jobs:
     env:
       APP_ID: ${{ secrets.id || vars.APP_ID }}
       PRIVATE_KEY: ${{ secrets.key || secrets.PRIVATE_KEY }}
+      NEW: '${{ inputs.newbies }}'
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.repos.outputs.repos }}
@@ -38,11 +39,13 @@ jobs:
       id: ${{ steps.repos.outputs.id }}
       email: ${{ steps.repos.outputs.email }}
     steps:
+      - id: check-type
       - id: new-repos
         run: |
           {
+            if [[
             echo "new<<EOF"
-            echo '${{ inputs.newbies }}'
+            echo '${{ env.NEW }}'
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - id: checkout
