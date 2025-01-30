@@ -6,6 +6,9 @@ on:
       newbies:
         required: false
         type: string
+      repo:
+        required: false
+        type: string
     secrets:
       id:
         required: true
@@ -39,10 +42,20 @@ jobs:
       email: ${{ steps.repos.outputs.email }}
     steps:
       - id: new-repos
+        name: "Evaluate inputs"
         run: |
+          echo '::debug::repo: ${{ inputs.repo }}'
+          echo '::debug::newbies: ${{ inputs.newbies }}'
           {
             echo "new<<EOF"
-            echo '${{ inputs.newbies }}'
+            if [[ $(grep -c '/' <<< '${{ inputs.repo }}') -gt 0 ]]; then
+              echo '${{ inputs.repo }}' \
+              | tr ' ' '\n' \
+              | jq -R \
+              | jq -sc 'map(split("/") | {owner:.[0], name:.[1]})'
+            else
+              echo '${{ inputs.newbies }}'
+            fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - id: checkout
