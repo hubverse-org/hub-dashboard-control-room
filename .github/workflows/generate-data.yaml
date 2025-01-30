@@ -55,8 +55,8 @@ jobs:
       hub: ${{ steps.get-hub-name.outputs.hub }}
       eval-art: ${{ steps.id.outputs.eval-art }}
       forecast-art: ${{ steps.id.outputs.forecast-art }}
-      predevals-ok: ${{ steps.check-status.outputs.predevals-ok }}
-      ptc-ok: ${{ steps.check-status.outputs.ptc-ok }}
+      predevals-ok: ${{ steps.status.outputs.predevals-ok }}
+      ptc-ok: ${{ steps.status.outputs.ptc-ok }}
     steps:
       - id: bot
         name: "Check if we are running a bot"
@@ -110,7 +110,7 @@ jobs:
           yq eval '.hub' cfg/site-config.yml \
           | sed -E -e 's+(https://github.com/|^)+hub=+' \
           | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
-      - id: status-check
+      - id: status
         name: "Check if we need to build data"
         run: |
           repo=${{ steps.id.outputs.repo }}
@@ -127,7 +127,7 @@ jobs:
             echo "ptc-ok=true" >> $GITHUB_OUTPUT
           fi
       - name: Upload artifact
-        if: ${{ fromJSON(steps.status-check.outputs.ptc-ok) || fromJSON(steps.status-check.outputs.predevals-ok) }}
+        if: ${{ fromJSON(steps.status.outputs.ptc-ok) || fromJSON(steps.status.outputs.predevals-ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
