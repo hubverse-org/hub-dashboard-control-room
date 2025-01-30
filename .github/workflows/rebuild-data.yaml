@@ -26,12 +26,13 @@ jobs:
   repos:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
     with:
-      newbies: "${{ toJSON(github.event.client_payload.newbies) }}"
-      repo: ${{ inputs.repo }}
+      newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
+      repo: '${{ inputs.repo }}'
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
-  site:
+  data:
+    name: "Build Data and Push"
     needs: [repos]
     strategy:
       fail-fast: false
