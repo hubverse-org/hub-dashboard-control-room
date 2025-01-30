@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       repo:
-        description: "Specific repository to rebuild"
+        description: "Repositories to build (space-separated owner/repo list)"
         type: string
         required: false
       publish:
