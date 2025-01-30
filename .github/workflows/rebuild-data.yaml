@@ -25,7 +25,7 @@ on:
 
 jobs:
   repos:
-    uses: .github/workflows/get-installations.yaml
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
     with:
       newbies: "${{ toJSON(github.event.client_payload.newbies) }}"
       repo: "${{ toJSON(inputs.repo) }}"
