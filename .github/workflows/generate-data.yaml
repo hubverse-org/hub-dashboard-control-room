@@ -311,7 +311,7 @@ jobs:
           name: ${{ needs.check.outputs.forecast-art }}
           path: 'out/'
   push-forecast-data:
-    name: "Push Forecasts to ${{ needs.check.outputs.repo }}@ptc/data"
+    name: "Push Forecasts to ptc/data branch"
     needs: [check, build-forecasts]
     if: ${{ inputs.publish && needs.check.outputs.forecast-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
@@ -326,7 +326,7 @@ jobs:
     secrets: inherit
   push-eval-data:
     needs: [check, build-evals]
-    name: "Push Forecasts to ${{ needs.check.outputs.repo }}@predevals/data"
+    name: "Push Evals to predevals/data branch"
     if: ${{ inputs.publish && needs.check.outputs.eval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
