@@ -2,6 +2,10 @@ name: "Build predtimechart dashboard"
 on:
   workflow_dispatch:
     inputs:
+      repo:
+        description: "Specific repository to rebuild"
+        type: string
+        required: false
       publish:
         description: "Publish Site (uncheck for a dry run)"
         type: boolean
@@ -19,13 +23,15 @@ jobs:
   repos:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
-      newbies: ${{ toJSON(github.event.client_payload.newbies) }}
+      newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
+      repo: '${{ inputs.repo }}'
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
     strategy:
+      fail-fast: false
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@main
@@ -40,11 +46,20 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   data:
     needs: [repos]
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
     with:
+      owner: '${{ matrix.site.owner }}'
+      name: '${{ matrix.site.name }}'
       repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
+      regenerate: ${{ github.event.client_payload.regenerate || inputs.regenerate || false }}
+      build: ${{ github.event.client_payload.build || 'both' }}
+      publish: ${{ inputs.publish || github.event_name != 'workflow_dispatch' }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
