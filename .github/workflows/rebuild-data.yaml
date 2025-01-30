@@ -31,6 +31,7 @@ jobs:
     strategy:
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
+    continue-on-error: true
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
     with:
       owner: '${{ matrix.site.owner }}'
