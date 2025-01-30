@@ -6,6 +6,9 @@ on:
       newbies:
         required: false
         type: string
+      repo:
+        required: false
+        type: string
     secrets:
       id:
         required: true
@@ -39,7 +42,6 @@ jobs:
       id: ${{ steps.repos.outputs.id }}
       email: ${{ steps.repos.outputs.email }}
     steps:
-      - id: check-type
       - id: new-repos
         run: |
           {
