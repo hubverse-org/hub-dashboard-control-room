@@ -70,11 +70,6 @@ jobs:
       - id: id
         name: "Setup Run Variables"
         run: |
-          # if [[ -n "${{ inputs.build }}" ]]; then
-          #   echo "build=${{ inputs.build }}" >> $GITHUB_OUTPUT
-          # else
-          #   echo "build=both" >> $GITHUB_OUTPUT
-          # fi
           owner="${{ env.OWNER }}"
           name="${{ env.REPO }}"
           key="${{ env.OWNER}}-${{ env.REPO }}"
