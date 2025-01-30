@@ -311,7 +311,7 @@ jobs:
       email: ${{ inputs.email }}
     secrets: inherit
   push-predevals-data:
-    needs: [check, build-predevals]
+    needs: [check, build-evals]
     if: ${{ needs.check.outputs.predeval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
