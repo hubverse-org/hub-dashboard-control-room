@@ -6,7 +6,6 @@ on:
         description: "Specific repository to rebuild"
         type: string
         required: false
-        default: zkamvar/test-hub-dashboard
       regenerate:
         description: "(Forecast) Regenerate Model Output Data"
         type: boolean
