@@ -28,13 +28,13 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
-    # strategy:
-    #   matrix:
-    #     site: ${{ fromJSON(needs.repos.outputs.repos) }}
+    strategy:
+      matrix:
+        site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
     with:
-      owner: zkamvar # '${{ matrix.site.owner }}'
-      name: test-hub-dashboard # '${{ matrix.site.name }}'
+      owner: '${{ matrix.site.owner }}'
+      name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
       regenerate: ${{ github.event.client_payload.regenerate || inputs.regenerate || false }}
