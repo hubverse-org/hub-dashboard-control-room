@@ -42,7 +42,10 @@ jobs:
       email: ${{ steps.repos.outputs.email }}
     steps:
       - id: new-repos
+        name: "Evaluate inputs"
         run: |
+          echo '::debug::repo: ${{ inputs.repo }}'
+          echo '::debug::newbies: ${{ inputs.newbies }}'
           {
             echo "new<<EOF"
             if [[ $(grep -c '/' <<< '${{ inputs.repo }}') -gt 0 ]]; then
