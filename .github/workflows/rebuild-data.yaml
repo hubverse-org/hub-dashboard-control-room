@@ -37,7 +37,7 @@ jobs:
     strategy:
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'
