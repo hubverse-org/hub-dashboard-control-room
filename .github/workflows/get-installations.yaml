@@ -47,7 +47,7 @@ jobs:
             echo "new<<EOF"
             if [[ $(grep -c '/' <<< '${{ inputs.repo }}') -gt 0 ]]; then
               echo '${{ inputs.repo }}' | \
-              jq -Rc '[. | split("/") | {owner:.[0], repo:.[1]}]'
+              jq -Rc '[. | split("/") | {owner:.[0], name:.[1]}]'
             else
               echo '${{ inputs.newbies }}'
             fi
