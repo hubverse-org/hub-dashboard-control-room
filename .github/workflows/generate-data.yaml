@@ -67,7 +67,8 @@ jobs:
             bot=true
           fi
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
-      - id: "Setup run variables"
+      - id: id
+        name: "Setup Run Variables"
         run: |
           # if [[ -n "${{ inputs.build }}" ]]; then
           #   echo "build=${{ inputs.build }}" >> $GITHUB_OUTPUT
