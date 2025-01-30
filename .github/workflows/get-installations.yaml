@@ -6,9 +6,11 @@ on:
       newbies:
         required: false
         type: string
+        default: ""
       repo:
         required: false
         type: string
+        default: ""
     secrets:
       id:
         required: true
@@ -34,7 +36,7 @@ jobs:
     env:
       APP_ID: ${{ secrets.id || vars.APP_ID }}
       PRIVATE_KEY: ${{ secrets.key || secrets.PRIVATE_KEY }}
-      NEW: '${{ inputs.newbies }}'
+      NEW: '${{ inputs.newbies || inputs.repo }}'
     runs-on: ubuntu-latest
     outputs:
       repos: ${{ steps.repos.outputs.repos }}
