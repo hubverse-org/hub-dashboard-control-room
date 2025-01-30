@@ -55,8 +55,8 @@ jobs:
       hub: ${{ steps.get-hub-name.outputs.hub }}
       eval-art: ${{ steps.id.outputs.eval-art }}
       forecast-art: ${{ steps.id.outputs.forecast-art }}
-      predevals-ok: ${{ steps.status.outputs.predevals-ok }}
-      ptc-ok: ${{ steps.status.outputs.ptc-ok }}
+      eval-ok: ${{ steps.status.outputs.eval-ok }}
+      forecast-ok: ${{ steps.status.outputs.forecast-ok }}
     steps:
       - id: bot
         name: "Check if we are running a bot"
@@ -82,8 +82,8 @@ jobs:
           echo "name=$name" >> $GITHUB_OUTPUT
           echo "key=$key" >> $GITHUB_OUTPUT
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-          echo "eval-art=$key-predevals-data" >> $GITHUB_OUTPUT
-          echo "forecast-art=$key-ptc-data" >> $GITHUB_OUTPUT
+          echo "eval-art=$key-eval-data" >> $GITHUB_OUTPUT
+          echo "forecast-art=$key-forecast-data" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         id: token
         with:
@@ -115,19 +115,19 @@ jobs:
         run: |
           repo=${{ steps.id.outputs.repo }}
           if [[ ! -f cfg/predevals-config.yml ]]; then
-            echo "predevals-ok=false" >> "$GITHUB_OUTPUT"
+            echo "eval-ok=false" >> "$GITHUB_OUTPUT"
             echo "::notice title=$repo: No evals to build::No predevals-config.yml file found."
           else
-            echo "predevals-ok=true" >> $GITHUB_OUTPUT
+            echo "eval-ok=true" >> $GITHUB_OUTPUT
           fi
           if [[ ! -f cfg/predtimechart-config.yml ]]; then
-            echo "ptc-ok=false" >> "$GITHUB_OUTPUT"
+            echo "forecast-ok=false" >> "$GITHUB_OUTPUT"
             echo "::notice title=$repo: No forecasts to build::No predtimechart-config.yml file found."
           else
-            echo "ptc-ok=true" >> $GITHUB_OUTPUT
+            echo "forecast-ok=true" >> $GITHUB_OUTPUT
           fi
       - name: Upload artifact
-        if: ${{ fromJSON(steps.status.outputs.ptc-ok) || fromJSON(steps.status.outputs.predevals-ok) }}
+        if: ${{ fromJSON(steps.status.outputs.forecast-ok) || fromJSON(steps.status.outputs.eval-ok) }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
@@ -146,7 +146,7 @@ jobs:
           echo '${{ toJSON(needs.check.outputs) }}'
   build-evals:
     needs: [check]
-    if: ${{ fromJSON(needs.check.outputs.predevals-ok) }}
+    if: ${{ fromJSON(needs.check.outputs.eval-ok) }}
     name: "Generate Eval Page Data"
     runs-on: ubuntu-latest
     container:
@@ -217,7 +217,7 @@ jobs:
           path: 'out/'
   build-forecasts:
     needs: [check]
-    if: ${{ fromJSON(needs.check.outputs.ptc-ok) }}
+    if: ${{ fromJSON(needs.check.outputs.forecast-ok) }}
     name: "Generate Forecast Page Data"
     runs-on: ubuntu-latest
     steps:
@@ -310,9 +310,9 @@ jobs:
         with:
           name: ${{ needs.check.outputs.forecast-art }}
           path: 'out/'
-  push-ptc-data:
+  push-forecast-data:
     needs: [check, build-forecasts]
-    if: ${{ inputs.publish && needs.check.outputs.ptc-ok }}
+    if: ${{ inputs.publish && needs.check.outputs.forecast-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
@@ -323,9 +323,9 @@ jobs:
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
     secrets: inherit
-  push-predevals-data:
+  push-eval-data:
     needs: [check, build-evals]
-    if: ${{ inputs.publish && needs.check.outputs.predeval-ok }}
+    if: ${{ inputs.publish && needs.check.outputs.eval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.check.outputs.exists) }}
