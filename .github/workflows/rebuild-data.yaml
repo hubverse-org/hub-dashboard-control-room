@@ -6,7 +6,7 @@ on:
         description: "(optional) dashboard repository"
         type: string
         required: false
-        default: null
+        default: zkamvar/test-hub-dashboard
       regenerate:
         description: "(Forecast) Regenerate Model Output Data"
         type: boolean
@@ -16,7 +16,7 @@ on:
         description: "Push Data to branch (uncheck for a dry run)"
         type: boolean
         required: false
-        default: true
+        default: false
   repository_dispatch:
     types:
       - "data"
