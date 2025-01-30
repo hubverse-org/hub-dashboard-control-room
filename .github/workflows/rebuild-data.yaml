@@ -2,11 +2,6 @@ name: "Rebuild Data"
 on:
   workflow_dispatch:
     inputs:
-      repo:
-        description: "(optional) dashboard repository"
-        type: string
-        required: false
-        default: zkamvar/test-hub-dashboard
       regenerate:
         description: "(Forecast) Regenerate Model Output Data"
         type: boolean
@@ -28,7 +23,6 @@ jobs:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
     with:
       newbies: "${{ toJSON(github.event.client_payload.newbies) }}"
-      repo: "${{ toJSON(inputs.repo) }}"
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
@@ -39,8 +33,8 @@ jobs:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
     with:
-      owner: '${{ matrix.site.owner }}'
-      name: '${{ matrix.site.name }}'
+      owner: zkamvar # '${{ matrix.site.owner }}'
+      name: test-hub-dashboard # '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
       regenerate: ${{ github.event.client_payload.regenerate || inputs.regenerate || false }}
