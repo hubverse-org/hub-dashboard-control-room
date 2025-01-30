@@ -2,6 +2,16 @@ name: "Rebuild Data"
 on:
   workflow_dispatch:
     inputs:
+      owner:
+        description: "(optional) GitHub username of a dashboard repository"
+        type: string
+        required: false
+        default: null
+      name:
+        description: "(optional) name of GitHub dashboard repository"
+        type: string
+        required: false
+        default: null
       regenerate:
         description: "(Forecast) Regenerate Model Output Data"
         type: boolean
@@ -22,7 +32,7 @@ jobs:
   repos:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
-      newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
+      newbies: '${{ toJSON(github.event.client_payload.newbies) || inputs }}'
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
