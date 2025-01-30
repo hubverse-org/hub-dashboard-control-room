@@ -20,6 +20,10 @@ on:
       email:
         required: true
         type: string
+      publish:
+        default: true
+        required: true
+        type: boolean
       regenerate:
         default: false
         required: true
