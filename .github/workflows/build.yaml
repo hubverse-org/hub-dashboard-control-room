@@ -7,7 +7,7 @@ on:
         type: string
         required: false
       publish:
-        description: "Publish Site (uncheck for a dry run)"
+        description: "Publish Data and Site (uncheck for a dry run)"
         type: boolean
         required: false
         default: true
@@ -21,7 +21,7 @@ on:
 
 jobs:
   repos:
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
       newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
       repo: '${{ inputs.repo }}'
@@ -50,7 +50,7 @@ jobs:
       fail-fast: false
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'
