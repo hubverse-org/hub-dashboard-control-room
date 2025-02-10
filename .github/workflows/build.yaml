@@ -21,7 +21,7 @@ on:
 
 jobs:
   repos:
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@znk/data-matrix-lift/14
     with:
       newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
       repo: '${{ inputs.repo }}'
@@ -50,11 +50,10 @@ jobs:
       fail-fast: false
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@znk/data-matrix-lift/14
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'
-      repos: '${{ needs.repos.outputs.repos }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
       regenerate: ${{ github.event.client_payload.regenerate || inputs.regenerate || false }}
