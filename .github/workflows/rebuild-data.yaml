@@ -1,6 +1,21 @@
 name: "Rebuild Data"
 on:
   workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repositories to build (space-separated owner/repo list)"
+        type: string
+        required: false
+      regenerate:
+        description: "(Forecast) Regenerate Model Output Data"
+        type: boolean
+        required: false
+        default: false
+      publish:
+        description: "Push Data to branch (uncheck for a dry run)"
+        type: boolean
+        required: false
+        default: true
   repository_dispatch:
     types:
       - "data"
@@ -12,17 +27,25 @@ jobs:
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
       newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
+      repo: '${{ inputs.repo }}'
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
-  site:
+  run:
     needs: [repos]
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.repos.outputs.repos) }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
     with:
-      repos: '${{ needs.repos.outputs.repos }}'
+      owner: '${{ matrix.site.owner }}'
+      name: '${{ matrix.site.name }}'
       slug: '${{ needs.repos.outputs.slug }}'
       email: '${{ needs.repos.outputs.email }}'
-      regenerate: ${{ github.event.client_payload.regenerate || false }}
+      regenerate: ${{ github.event.client_payload.regenerate || inputs.regenerate || false }}
+      build: ${{ github.event.client_payload.build || 'both' }}
+      publish: ${{ inputs.publish || github.event_name != 'workflow_dispatch' }}
     secrets:
       id: ${{ vars.APP_ID }}
       key: ${{ secrets.PRIVATE_KEY }}
