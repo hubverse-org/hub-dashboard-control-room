@@ -16,9 +16,15 @@ There are two ways to use these workflows:
 1. via re-usable workflows (if you can run workflows in your repository)
 2. app-based runs (if you are unable to run workflows in your repository)
 
+For both options, you will make a copy of [the hub dashboard
+template](https://github.com/new?template_name=hub-dashboard-template&template_owner=hubverse-org).
+
+If you want to register [the hubDashboard
+app](https://github.com/apps/hubdashboard/installations/new), you can install
+it on the specific repository and then make a pull request to this repository
+that modifies `known-repos.json` that includes your repository.
+
 ### Re-usable workflows
-
-
 
 ## Implementation Details
 
@@ -71,7 +77,7 @@ below
  - [hub-dashboard-predtimechart (Python app to build predtimechart data for the forecasts)](https://github.com/hubverse-org/hub-dashboard-predtimechart)
  - [hubPredEvalsData-docker (Docker container to build evaluation data)](https://github.com/hubverse-org/hubPredEvalsData-docker)
 
-These are the generalized steps to generate the data and the site
+These are the generalized steps to generate the data and the site:
 
 ### Predtimechart data
 
@@ -106,21 +112,25 @@ The general steps to generate the data for predtimechart are:
 
 ### Evals Data
 
-
-TBD
-
 1. clone the dashboard repository and enter it (you only need the `predevals-config.yml`)
 2. clone the hub repository into `repo/`
 3. Run the container:
   ```bash
+
   repo="cdcepi/FluSight-forecast-hub/" # change this to where the oracle data should be fetched from
   prefix="https://raw.githubusercontent.com/${repo}/refs/heads"
   oracle="${prefix}/oracle-data/oracle-output.csv"
-  create-predevals-data.R \
-    -h repo \
-    -c predevals-config.yml \
-    -d $oracle \
-    -o out
+  docker run \
+    --platform=linux/amd64 \
+    --rm \
+    -ti \
+    -v "$(pwd)":"/site" \
+    ghcr.io/hubverse-org/hubPredEvalsData-docker:main \
+    create-predevals-data.R \
+      -h repo \
+      -c predevals-config.yml \
+      -d "$oracle" \
+      -o out
   ```
 4. enter `repo/` and checkout the `predevals/data` branch
 5. copy the contents of `../out` to your current folder
@@ -138,7 +148,7 @@ branch of the dashboard repository.
 1. clone the dashboard repository
 2. Run the container:
    ```bash
-   $ docker run \
+   docker run \
      --platform=linux/amd64 \
      --rm \
      -ti \
