@@ -26,3 +26,106 @@ That's it! Head back to the Probot [Webhook Docs](https://probot.github.io/docs/
 
 Find out more [about Glitch](https://glitch.com/about).
 \ ゜o゜)ノ
+
+This folder contains node JS scripts for the [hubDashboard App](https://github.com/apps/hubDashboard).
+For repositories that have the app installed, these scripts will send a signal
+to the control room workflows on specific events listed in `app.yml`.
+
+## Broad Architecture
+
+The hubDashboard App allows hub administrators to opt-in to an auto-generated
+dashboard. By default, when anyone installs the app on their dashboard
+repository, the dashboard will be built once on the initial build and then
+every day on a schedule defined in this repository. The role of the app in this
+workflow is twofold:
+
+1. provide a list of repositories that have it installed.
+2. provide credentials for our workflows to write to branches of the dashboard
+
+The workflow looks like this for each repository 
+(note the build processes are in parallel):
+
+```mermaid
+sequenceDiagram
+     participant GitHub
+     participant App
+     GitHub-->>App: Request installation name
+     App->>GitHub: Installed: "dashboard-repo"
+
+     create participant dashboard-repo
+     GitHub-->>dashboard-repo: fetch "dashboard-repo"
+     Note over GitHub: Builds static site to site/
+     GitHub-->>dashboard-repo: Read hub repository name from config
+     dashboard-repo->>GitHub: Hub Repository: "hub-repo"
+     create participant hub as hub-repository
+     GitHub-->>hub: fetch "hub-repo"
+     Note over GitHub: Builds Predtimechart data to data/
+     GitHub-->>App: Generate Access Token
+     App-->>GitHub: Access Toekn
+     GitHub->>dashboard-repo: Push site/ to gh-pages
+     GitHub->>dashboard-repo: Push data/ to ptc/data
+```
+
+### On-Demand Builds
+
+One of the advantages of using an app is that it can provide on-demand builds
+without requiring maintainers running or knowing how to run GitHub workflows.
+
+It's useful to understand that a GitHub App is kind of like a mailbox. It can
+receive messages (webhooks) and send messages (API requests). Just like a
+mailbox, you cannot just stick one in a random place an assume that you can
+start receiving messages---you have to give it an address (a webserver).
+
+In our case, we have [hubDashboard (GitHub app)](https://github.com/apps/hubDashboard) which is running on [glitch (webserver)](https://glitch.com/~crystal-glimmer-path). The scripts for this app live in [`app/index.js`](app/index.js).
+
+When the app is installed on a repository, GitHub knows that it has to send
+[webhook events related to installations, issue comments, and pushes](https://docs.github.com/en/webhooks/webhook-events-and-payloads) to the
+webserver address (which at the moment is
+https://crystal-glimmer-path.glitch.me/probot). When the app receives webhooks
+that it recognises, then it will send a GitHub API request with a [repository
+dispatch event](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#repository_dispatch)
+which will trigger a build.
+
+All the pieces together look like this:
+
+```mermaid
+flowchart TD
+    webserver{{"webserver (glitch)"}}
+
+
+    app{"App"}
+    app-workflows["control-room"]
+
+    hub["org1/hub"]
+
+    subgraph org1/site
+    main>main]
+    gh-pages>gh-pages]
+    ptc/data>"ptc/data"]
+    end
+
+    
+
+    org1/site==>|"sends webhook events"|webserver
+    app-->|grants permission to|app-workflows
+    webserver==>|"triggers build (via GH API)"|app-workflows
+    app-->|runs on|webserver
+    
+
+    site1(["org1.github.io/site"])
+    
+    
+    org1/site~~~site1
+    app-workflows~~~hub
+    hub~~~org1/site
+
+    main-->|links to| hub
+    app-->|installed on|org1/site
+    main-.->|markdown content|app-workflows
+    hub-.->|data|app-workflows
+    app-workflows==>|writes site to|gh-pages
+    app-workflows==>|writes data to|ptc/data
+    gh-pages==>|deploys to|site1
+    site1-.->|fetches data from|ptc/data
+```
+
