@@ -16,13 +16,11 @@ There are two ways to use these workflows:
 1. via re-usable workflows (if you can run workflows in your repository)
 2. app-based runs (if you are unable to run workflows in your repository)
 
-For both options, you will make a copy of [the hub dashboard
+For both options, you will create a new GitHub repository based on [the hub dashboard
 template](https://github.com/new?template_name=hub-dashboard-template&template_owner=hubverse-org).
 
-If you want to register [the hubDashboard
-app](https://github.com/apps/hubdashboard/installations/new), you can install
-it on the specific repository and then make a pull request to this repository
-that modifies `known-repos.json` that includes your repository.
+If you plan to use [the hubDashboard
+app](https://github.com/apps/hubdashboard/installations/new), install it on the dashboard repository you just created. Then make a pull request here (`hub-dashboard-control-room`), adding the new dashboard repository name to `known-hubs.json`.
 
 ### Re-usable workflows
 
