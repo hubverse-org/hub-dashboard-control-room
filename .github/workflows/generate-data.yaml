@@ -144,7 +144,7 @@ jobs:
     steps:
       - uses: actions/create-github-app-token@v1
         id: token
-        if: ${{ needs.check.outputs.exists }}
+        if: ${{ fromJSON(needs.check.outputs.exists) }}
         with:
           app-id: ${{ secrets.id }}
           private-key: ${{ secrets.key }}
