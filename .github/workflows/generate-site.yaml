@@ -107,12 +107,9 @@ jobs:
             "${{ env.REPO }}" \
             "ptc/data" \
             "" \
-            "${{ steps.check-configs.outputs.forecasts }}" \
-          && echo "success=true" >> $GITHUB_OUTPUT \
-          || echo "success=false" >> $GITHUB_OUTPUT
+            "${{ steps.check-configs.outputs.forecasts }}"
       - name: Upload artifact
         id: upload
-        if: ${{ fromJSON(steps.build-site.outputs.success) }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.id.outputs.file }}
@@ -121,7 +118,7 @@ jobs:
   push-site:
     name: "Push Site"
     needs: [build-site]
-    if: ${{ inputs.publish && fromJSON(needs.build-site.outputs.success) }}
+    if: ${{ inputs.publish }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
       is_bot: ${{ fromJSON(needs.build-site.outputs.is-bot) }}
