@@ -151,7 +151,7 @@ branch of the dashboard repository.
      --rm \
      -ti \
      -v "/path/to/dashboard/repo":"/site" \
-     ghcr.io/hubverse-org/hub-dash-site-builder:main \
+     ghcr.io/hubverse-org/hub-dash-site-builder:latest \
      bash render.sh
    ```
 3. clone the gh-pages branch of the dashboard repository into `pages/`
