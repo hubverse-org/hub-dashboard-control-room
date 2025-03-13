@@ -44,7 +44,7 @@ jobs:
       success: ${{ steps.build-site.outputs.success }}
       is-bot: ${{ steps.is-bot.outputs.bot }}
     container:
-      image: ghcr.io/hubverse-org/hub-dash-site-builder:main
+      image: ghcr.io/hubverse-org/hub-dash-site-builder:latest
       ports:
         - 80
       volumes:
