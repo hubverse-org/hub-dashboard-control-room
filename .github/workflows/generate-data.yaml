@@ -193,8 +193,8 @@ jobs:
         run: |
           ls -larth
           mkdir -p out/
-          dashboard="https://raw.githubusercontent.com/${{ env.REPO }}/refs/heads"
-          hub="https://raw.githubusercontent.com/${{ env.HUB }}/refs/heads"
+          dashboard="https://raw.githubusercontent.com/${REPO}/refs/heads"
+          hub="https://raw.githubusercontent.com/${HUB}/refs/heads"
           test="${hub}/main/target-data/oracle-output.csv"
           # Test if the oracle output is in the hub main branch or if its in the
           # dashboard oracle-data branch and use the appropriate one for the tool
