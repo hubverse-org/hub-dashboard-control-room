@@ -39,6 +39,13 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      CWD=${{ github.workspace }}
+      OWNER=${{ inputs.owner }}
+      NAME=${{ inputs.name }}
+      BRANCH=${{ inputs.branch }}
+      SLUG=${{ inputs.slug }}
+      EMAIL=${{ inputs.email }}
     steps:
       - id: checkout-this-here-repo-scripts
         uses: actions/checkout@v4
@@ -51,9 +58,7 @@ jobs:
       - id: id
         name: "setup run variables"
         run: |
-          owner="${{ inputs.owner }}"
-          name="${{ inputs.name }}"
-          echo "repo=$owner/$name" >> $GITHUB_OUTPUT
+          echo "repo=$OWNER/$NAME" >> $GITHUB_OUTPUT
       - uses: actions/create-github-app-token@v1
         if: ${{ fromJSON(inputs.is_bot) }}
         id: token
@@ -65,14 +70,16 @@ jobs:
       - id: check-branch
         env:
           GH_TOKEN: ${{ github.token }}
-        name: "check for ${{ inputs.branch }}branch and create if needed"
+          REPO: ${{ steps.id.outputs.repo }}
+          TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        name: "check for ${{ inputs.branch }} branch and create if needed"
         run: |
-          bash -x "${{ github.workspace }}/scripts/check-branch.sh" \
-            "${{ inputs.branch }}" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
+          bash -x "$CWD/scripts/check-branch.sh" \
+            "$BRANCH" \
+            "$REPO" \
+            "$SLUG" \
+            "$EMAIL" \
+            "$TOKEN"
       - id: checkout-data
         uses: actions/checkout@v4
         with:
@@ -87,11 +94,14 @@ jobs:
           name: ${{ inputs.artifact }}
       - id: publish
         name: "Publish to ${{ inputs.branch }} branch"
-        run: | 
+        env:
+          REPO: ${{ steps.id.outputs.repo }}
+          TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+        run: |
           ls -larth
-          bash -x "${{ github.workspace }}/scripts/pushit.sh" \
-            "${{ inputs.branch }}" \
-            "${{ steps.id.outputs.repo }}" \
-            "${{ inputs.slug }}" \
-            "${{ inputs.email }}" \
-            "${{ steps.token.outputs.token || secrets.key }}"
+          bash -x "$CWD/scripts/pushit.sh" \
+            "$BRANCH" \
+            "$REPO" \
+            "$SLUG" \
+            "$EMAIL" \
+            "$TOKEN"
