@@ -190,8 +190,16 @@ jobs:
         run: |
           ls -larth
           mkdir -p out/
-          prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-          oracle="${prefix}/main/target-data/oracle-output.csv"
+          dashboard="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
+          hub="https://raw.githubusercontent.com/${{ needs.check.outputs.hub }}/refs/heads"
+          test="${hub}/main/target-data/oracle-output.csv"
+          # Test if the oracle output is in the hub main branch or if its in the
+          # dashboard oracle-data branch and use the appropriate one for the tool
+          if curl --head --silent "$test" > /dev/null 2>&1; then
+            oracle="$test"
+          else
+            oracle="${dashboard}/oracle-data/oracle-output.csv"
+          fi
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
