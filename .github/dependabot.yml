@@ -1,0 +1,23 @@
+# instruct GitHub dependabot to scan github actions for updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    # dependabot automatically checks .github/workflows/ and .github/actions/
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    # we (for better or worse) have dumped the python code in the root of the repo
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    # this is code for the hubDashboard app that we will soon discontinue
+    directory: "/app/"
+    schedule:
+      interval: "weekly"
+
+
