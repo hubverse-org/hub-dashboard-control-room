@@ -191,7 +191,7 @@ jobs:
           ls -larth
           mkdir -p out/
           prefix="https://raw.githubusercontent.com/${{ needs.check.outputs.repo }}/refs/heads"
-          oracle="${prefix}/target-data/oracle-output.csv"
+          oracle="${prefix}/main/target-data/oracle-output.csv"
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
