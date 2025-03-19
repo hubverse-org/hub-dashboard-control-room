@@ -31,6 +31,8 @@ on:
 jobs:
   repos:
     name: "Get list of dashboard repositories"
+    permissions:
+      contents: read
     env:
       APP_ID: ${{ secrets.id || vars.APP_ID }}
       PRIVATE_KEY: ${{ secrets.key || secrets.PRIVATE_KEY }}

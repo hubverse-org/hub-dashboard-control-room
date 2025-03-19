@@ -35,6 +35,8 @@ on:
 jobs:
   push-data:
     name: "Push Data"
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:

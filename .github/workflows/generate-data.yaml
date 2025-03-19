@@ -42,9 +42,12 @@ env:
   OWNER: ${{ inputs.owner || fromJSON(inputs.repos)[0].owner }}
   REPO: ${{ inputs.name || fromJSON(inputs.repos)[0].name }}
 
+
 jobs:
   check:
     name: "Setup"
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       exists: ${{ steps.bot.outputs.bot }}
@@ -131,9 +134,11 @@ jobs:
           path: 'cfg/'
 
   build-evals:
+    name: "Generate Eval Page Data"
+    permissions:
+      contents: read
     needs: [check]
     if: ${{ fromJSON(needs.check.outputs.eval-ok) }}
-    name: "Generate Eval Page Data"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
@@ -204,9 +209,11 @@ jobs:
           name: ${{ needs.check.outputs.eval-art }}
           path: 'out/'
   build-forecasts:
+    name: "Generate Forecast Page Data"
+    permissions:
+      contents: read
     needs: [check]
     if: ${{ fromJSON(needs.check.outputs.forecast-ok) }}
-    name: "Generate Forecast Page Data"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/create-github-app-token@v1
@@ -301,6 +308,8 @@ jobs:
           path: 'out/'
   push-forecast-data:
     name: "Push Forecasts to ptc/data branch"
+    permissions:
+      contents: write
     needs: [check, build-forecasts]
     if: ${{ inputs.publish && needs.check.outputs.forecast-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
@@ -314,8 +323,10 @@ jobs:
       email: ${{ inputs.email }}
     secrets: inherit
   push-eval-data:
-    needs: [check, build-evals]
     name: "Push Evals to predevals/data branch"
+    permissions:
+      contents: write
+    needs: [check, build-evals]
     if: ${{ inputs.publish && needs.check.outputs.eval-ok }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
     with:
