@@ -21,6 +21,9 @@ on:
 
 jobs:
   repos:
+    name: "Fetch Registered Repositories"
+    permissions:
+      contents: read
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/get-installations.yaml@main
     with:
       newbies: '${{ toJSON(github.event.client_payload.newbies) }}'
@@ -30,6 +33,8 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   site:
     needs: [repos]
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -46,6 +51,8 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   data:
     needs: [repos]
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:

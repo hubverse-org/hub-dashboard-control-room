@@ -37,6 +37,8 @@ env:
 jobs:
   build-site:
     name: "Build Site"
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       owner: ${{ steps.id.outputs.owner }}
@@ -117,6 +119,8 @@ jobs:
           retention-days: 1
   push-site:
     name: "Push Site"
+    permissions:
+      contents: write
     needs: [build-site]
     if: ${{ inputs.publish }}
     uses: hubverse-org/hub-dashboard-control-room/.github/workflows/push-things.yaml@main
