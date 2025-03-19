@@ -53,9 +53,11 @@ jobs:
         - ${{ github.workspace }}:/site
     steps:
       - id: is-bot
+        env:
+          BOT_ID: ${{ secrets.id }}
         name: "Check if we are running a bot"
         run: |
-          if [[ "${{ secrets.id }}" = "none" ]]; then
+          if [[ "$BOT_ID" = "none" ]]; then #19
             bot=false
           else
             bot=true
@@ -75,8 +77,8 @@ jobs:
       - id: id
         name: "setup run variables"
         run: |
-          owner="${{ env.OWNER }}"
-          name="${{ env.REPO }}"
+          owner="$OWNER"
+          name="$REPO"
           echo "owner=$owner" >> $GITHUB_OUTPUT
           echo "name=$name" >> $GITHUB_OUTPUT
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
@@ -91,9 +93,11 @@ jobs:
       - id: check-configs
         name: "Check if we need to build site"
         shell: "bash"
+        env:
+          REPO: ${{ steps.id.outputs.repo }}
         run: |
           if [[ ! -f site-config.yml ]]; then
-            echo "::error title=Missing config (${{ steps.id.outputs.repo }})::No site-config.yml file found. Exiting."
+            echo "::error title=Missing config ($REPO)::No site-config.yml file found. Exiting."
             exit 1
           fi
           if [[ -f predtimechart-config.yml ]]; then
@@ -103,13 +107,15 @@ jobs:
           fi
       - id: build-site
         name: "Render Website"
+        env:
+          HAS_FORECASTS: ${{ steps.check-configs.outputs.forecasts }}
         run: |
           bash /render.sh \
-            "${{ env.OWNER }}" \
-            "${{ env.REPO }}" \
+            "$OWNER" \
+            "$REPO" \
             "ptc/data" \
             "" \
-            "${{ steps.check-configs.outputs.forecasts }}"
+            "$HAS_FORECASTS"
       - name: Upload artifact
         id: upload
         uses: actions/upload-artifact@v4
