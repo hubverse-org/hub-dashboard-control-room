@@ -63,8 +63,10 @@ jobs:
     steps:
       - id: bot
         name: "Check if we are running a bot"
+        env:
+          BOT_ID: ${{ secrets.id }}
         run: |
-          if [[ "${{ secrets.id }}" = "none" ]]; then
+          if [[ "$BOT_ID" = "none" ]]; then
             bot=false
           else
             bot=true
@@ -73,9 +75,9 @@ jobs:
       - id: id
         name: "Setup Run Variables"
         run: |
-          owner="${{ env.OWNER }}"
-          name="${{ env.REPO }}"
-          key="${{ env.OWNER}}-${{ env.REPO }}"
+          owner="$OWNER"
+          name="$REPO"
+          key="$OWNER-$REPO"
           echo "owner=$owner" >> $GITHUB_OUTPUT
           echo "name=$name" >> $GITHUB_OUTPUT
           echo "key=$key" >> $GITHUB_OUTPUT
@@ -111,8 +113,10 @@ jobs:
           | sed -E -e 's+[/]$++' >> $GITHUB_OUTPUT
       - id: status
         name: "Check if we need to build data"
+        env:
+          REPO: ${{ steps.id.outputs.repo }}
         run: |
-          repo=${{ steps.id.outputs.repo }}
+          repo="$REPO"
           if [[ ! -f cfg/predevals-config.yml ]]; then
             echo "eval-ok=false" >> "$GITHUB_OUTPUT"
             echo "::notice title=$repo: No evals to build::No predevals-config.yml file found."
@@ -164,8 +168,9 @@ jobs:
         name: "Verify existence of predevals/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
-        run: | 
-          exists=$(curl -sSL "https://api.github.com/repos/${{ needs.check.outputs.repo }}/branches" | jq -r '.[].name | select(. == "predevals/data")')
+          REPO: ${{ needs.check.outputs.repo }}
+        run: |
+          exists=$(curl -sSL "https://api.github.com/repos/$REPO/branches" | jq -r '.[].name | select(. == "predevals/data")')
           echo $exists
           if [[ "$exists" = "predevals/data" ]]; then
             fetch=true
@@ -254,8 +259,9 @@ jobs:
         name: "Validate existence of ptc/data branch"
         env:
           GH_TOKEN: ${{ steps.token.outputs.token || secrets.key }}
+          REPO: ${{ needs.check.outputs.repo }}
         run: |
-          exists=$(gh api -X GET "repos/${{ needs.check.outputs.repo }}/branches" --jq '.[].name | select(. == "ptc/data")')
+          exists=$(gh api -X GET "repos/$REPO/branches" --jq '.[].name | select(. == "ptc/data")')
           if [[ "$exists" = "ptc/data" ]]; then
             fetch=true
           else
@@ -293,11 +299,13 @@ jobs:
       - id: json-lives
         if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
         name: "Generate forecast data"
+        env:
+          REGENERATE: ${{ inputs.regenerate }}
         run: |
           ls -larth
           mkdir -p out/targets/
           mkdir -p out/forecasts/
-          if [[ ${{ inputs.regenerate }} == 'true' ]]; then
+          if [[ "$REGENERATE" == 'true' ]]; then
             ptc_generate_json_files \
               repo \
               predtimechart-config.yml \
