@@ -40,12 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
-      CWD=${{ github.workspace }}
-      OWNER=${{ inputs.owner }}
-      NAME=${{ inputs.name }}
-      BRANCH=${{ inputs.branch }}
-      SLUG=${{ inputs.slug }}
-      EMAIL=${{ inputs.email }}
+      CWD: ${{ github.workspace }}
+      OWNER: ${{ inputs.owner }}
+      NAME: ${{ inputs.name }}
+      BRANCH: ${{ inputs.branch }}
+      SLUG: ${{ inputs.slug }}
+      EMAIL: ${{ inputs.email }}
     steps:
       - id: checkout-this-here-repo-scripts
         uses: actions/checkout@v4
