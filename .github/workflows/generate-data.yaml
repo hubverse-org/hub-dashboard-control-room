@@ -82,7 +82,7 @@ jobs:
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "eval-art=$key-eval-data" >> $GITHUB_OUTPUT
           echo "forecast-art=$key-forecast-data" >> $GITHUB_OUTPUT
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09
         id: token
         if: ${{ fromJSON(steps.bot.outputs.bot) }}
         with:
@@ -92,7 +92,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           token: ${{ steps.token.outputs.token || secrets.key }}
@@ -128,7 +128,7 @@ jobs:
       - name: "Save config files"
         if: ${{ fromJSON(steps.status.outputs.forecast-ok) || fromJSON(steps.status.outputs.eval-ok) }}
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ steps.id.outputs.key }}-cfg
           path: 'cfg/'
@@ -147,7 +147,7 @@ jobs:
       volumes:
         - ${{ github.workspace }}:/project
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09
         id: token
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         with:
@@ -157,7 +157,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: check-branch
@@ -176,7 +176,7 @@ jobs:
       - id: checkout-data
         if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout predevals/data branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
@@ -185,7 +185,7 @@ jobs:
           path: 'out'
       - id: clone-repo
         name: "Fetch ${{ needs.check.outputs.hub }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           repository: ${{ needs.check.outputs.hub }}
@@ -215,7 +215,7 @@ jobs:
           -o out
       - name: "Save scores data artifact"
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ needs.check.outputs.eval-art }}
           path: 'out/'
@@ -227,7 +227,7 @@ jobs:
     if: ${{ fromJSON(needs.check.outputs.forecast-ok) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
@@ -237,12 +237,12 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: setup-snake
         name: "Setup Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
         with:
           python-version: 3.12
       - id: install-predtimechart-tool
@@ -265,7 +265,7 @@ jobs:
       - id: checkout-data
         if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
@@ -274,7 +274,7 @@ jobs:
           path: 'out'
       - id: clone-repo
         name: "Fetch ${{ needs.check.outputs.hub }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           repository: ${{ needs.check.outputs.hub }}
@@ -313,7 +313,7 @@ jobs:
           fi
       - name: "Save forecast data artifact"
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ needs.check.outputs.forecast-art }}
           path: 'out/'

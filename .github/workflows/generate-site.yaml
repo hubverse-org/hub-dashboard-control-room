@@ -63,7 +63,7 @@ jobs:
           echo "bot is $bot"
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09
         if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         name: "Generate App Token (if no token present)"
         id: token
@@ -83,7 +83,7 @@ jobs:
           echo "file=$owner-$name-site" >> $GITHUB_OUTPUT
       - id: checkout
         name: "Fetch ${{ steps.id.outputs.repo }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
@@ -112,7 +112,7 @@ jobs:
             "${{ steps.check-configs.outputs.forecasts }}"
       - name: Upload artifact
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ steps.id.outputs.file }}
           path: '/site/pages/'

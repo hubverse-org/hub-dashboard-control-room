@@ -41,7 +41,7 @@ jobs:
     continue-on-error: true
     steps:
       - id: checkout-this-here-repo-scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: hubverse-org/hub-dashboard-control-room
           ref: main
@@ -54,7 +54,7 @@ jobs:
           owner="${{ inputs.owner }}"
           name="${{ inputs.name }}"
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09
         if: ${{ fromJSON(inputs.is_bot) }}
         id: token
         with:
@@ -74,7 +74,7 @@ jobs:
             "${{ inputs.email }}" \
             "${{ steps.token.outputs.token || secrets.key }}"
       - id: checkout-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           repository: ${{ steps.id.outputs.repo }}
@@ -82,7 +82,7 @@ jobs:
           path: 'data'
           token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
         with:
           name: ${{ inputs.artifact }}
       - id: publish
