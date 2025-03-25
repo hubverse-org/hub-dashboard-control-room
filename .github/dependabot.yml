@@ -7,17 +7,38 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # group all run-of-the mill updates into a single pull request
+    groups:
+      gha-updates:
+        applies-to: version-updates
+        update-types:
+          - patch
+          - minor
 
   - package-ecosystem: "pip"
     # we (for better or worse) have dumped the python code in the root of the repo
     directory: "/"
     schedule:
       interval: "weekly"
+    # group all run-of-the mill updates into a single pull request
+    groups:
+      py-updates:
+        applies-to: version-updates
+        update-types:
+          - patch
+          - minor
 
   - package-ecosystem: "npm"
     # this is code for the hubDashboard app that we will soon discontinue
     directory: "/app/"
     schedule:
       interval: "weekly"
+    # group all run-of-the mill updates into a single pull request
+    groups:
+      js-updates:
+        applies-to: version-updates
+        update-types:
+          - patch
+          - minor
 
 
