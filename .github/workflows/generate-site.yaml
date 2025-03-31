@@ -46,7 +46,7 @@ jobs:
       success: ${{ steps.build-site.outputs.success }}
       is-bot: ${{ steps.is-bot.outputs.bot }}
     container:
-      image: ghcr.io/hubverse-org/hub-dash-site-builder:latest
+      image: ghcr.io/hubverse-org/hub-dash-site-builder:znk-dispatch-fix-34
       ports:
         - 80
       volumes:
@@ -100,22 +100,9 @@ jobs:
             echo "::error title=Missing config ($REPO)::No site-config.yml file found. Exiting."
             exit 1
           fi
-          if [[ -f predtimechart-config.yml ]]; then
-            echo "forecasts=true" >> $GITHUB_OUTPUT
-          else
-            echo "forecasts=false" >> $GITHUB_OUTPUT
-          fi
       - id: build-site
         name: "Render Website"
-        env:
-          HAS_FORECASTS: ${{ steps.check-configs.outputs.forecasts }}
-        run: |
-          bash /render.sh \
-            "$OWNER" \
-            "$REPO" \
-            "ptc/data" \
-            "" \
-            "$HAS_FORECASTS"
+        run: render.sh -u "$OWNER" -r "$REPO"
       - name: Upload artifact
         id: upload
         uses: actions/upload-artifact@v4
