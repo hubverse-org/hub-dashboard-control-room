@@ -51,6 +51,7 @@ jobs:
       key: ${{ secrets.PRIVATE_KEY }}
   data:
     needs: [repos]
+    if: ${{ github.event_name != 'schedule' }}
     permissions:
       contents: write
     strategy:
