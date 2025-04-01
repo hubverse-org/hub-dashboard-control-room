@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@main
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-data.yaml@zkamvar-patch-1
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'
