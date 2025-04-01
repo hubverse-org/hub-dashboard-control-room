@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         site: ${{ fromJSON(needs.repos.outputs.repos) }}
-    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@znk/use-release-hdsb/58
+    uses: hubverse-org/hub-dashboard-control-room/.github/workflows/generate-site.yaml@main
     with:
       owner: '${{ matrix.site.owner }}'
       name: '${{ matrix.site.name }}'
