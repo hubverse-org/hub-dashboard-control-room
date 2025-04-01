@@ -100,22 +100,9 @@ jobs:
             echo "::error title=Missing config ($REPO)::No site-config.yml file found. Exiting."
             exit 1
           fi
-          if [[ -f predtimechart-config.yml ]]; then
-            echo "forecasts=true" >> $GITHUB_OUTPUT
-          else
-            echo "forecasts=false" >> $GITHUB_OUTPUT
-          fi
       - id: build-site
         name: "Render Website"
-        env:
-          HAS_FORECASTS: ${{ steps.check-configs.outputs.forecasts }}
-        run: |
-          bash /render.sh \
-            "$OWNER" \
-            "$REPO" \
-            "ptc/data" \
-            "" \
-            "$HAS_FORECASTS"
+        run: render.sh -u "$OWNER" -r "$REPO"
       - name: Upload artifact
         id: upload
         uses: actions/upload-artifact@v4
