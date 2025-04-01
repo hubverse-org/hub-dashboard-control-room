@@ -254,8 +254,9 @@ jobs:
       - id: install-predtimechart-tool
         name: "Install predtimechart conversion tool"
         run: |
+          latest=$(gh api -X GET "repos/hubverse-org/hub-dashboard-predtimechart/releases/latest" --q ".tag_name")
           pip install --upgrade pip
-          pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
+          pip install "git+https://github.com/hubverse-org/hub-dashboard-predtimechart@$latest"
       - id: check-branch
         name: "Validate existence of ptc/data branch"
         env:
