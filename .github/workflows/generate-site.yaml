@@ -65,7 +65,7 @@ jobs:
           echo "bot is $bot"
           echo "bot=$bot" >> "$GITHUB_OUTPUT"
         shell: bash
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         if: ${{ fromJSON(steps.is-bot.outputs.bot) }}
         name: "Generate App Token (if no token present)"
         id: token

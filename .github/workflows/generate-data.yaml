@@ -84,7 +84,7 @@ jobs:
           echo "repo=$owner/$name" >> $GITHUB_OUTPUT
           echo "eval-art=$key-eval-data" >> $GITHUB_OUTPUT
           echo "forecast-art=$key-forecast-data" >> $GITHUB_OUTPUT
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: token
         if: ${{ fromJSON(steps.bot.outputs.bot) }}
         with:
@@ -151,7 +151,7 @@ jobs:
       volumes:
         - ${{ github.workspace }}:/project
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: token
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         with:
@@ -233,7 +233,7 @@ jobs:
     if: ${{ fromJSON(needs.check.outputs.forecast-ok) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         if: ${{ fromJSON(needs.check.outputs.exists) }}
         id: token
         with:
