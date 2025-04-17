@@ -291,15 +291,25 @@ jobs:
           path: 'repo'
       - id: build-targets
         name: "Generate target data"
+        env:
+          REGENERATE: ${{ inputs.regenerate }}
         if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
         run: |
           ls -larth
           mkdir -p out/targets/
           mkdir -p out/forecasts/
+          if [[ "$REGENERATE" == 'true' ]]; then
+          ptc_generate_target_json_files \
+            repo \
+            predtimechart-config.yml \
+            out/targets \
+            --regenerate
+          else
           ptc_generate_target_json_files \
             repo \
             predtimechart-config.yml \
             out/targets
+          fi
       - id: json-lives
         if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
         name: "Generate forecast data"
