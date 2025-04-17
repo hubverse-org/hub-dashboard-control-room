@@ -292,8 +292,8 @@ jobs:
       - id: build-targets
         name: "Generate target data"
         env:
-          REGENERATE: ${{ inputs.regenerate }}
-        if: ${{ inputs.build == 'both' || inputs.build == 'target' }}
+          REGENERATE: ${{ toJSON(inputs.regenerate) }}
+        if: ${{ toJSON(inputs.build) == 'both' || toJSON(inputs.build) == 'target' }}
         run: |
           ls -larth
           mkdir -p out/targets/
@@ -311,7 +311,7 @@ jobs:
             out/targets
           fi
       - id: json-lives
-        if: ${{ inputs.build == 'both' || inputs.build == 'forecast' }}
+        if: ${{ toJSON(inputs.build) == 'both' || toJSON(inputs.build) == 'forecast' }}
         name: "Generate forecast data"
         env:
           REGENERATE: ${{ inputs.regenerate }}
