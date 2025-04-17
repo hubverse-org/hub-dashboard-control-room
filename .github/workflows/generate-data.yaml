@@ -258,7 +258,7 @@ jobs:
         run: |
           latest=$(gh api -X GET "repos/hubverse-org/hub-dashboard-predtimechart/releases/latest" --jq ".tag_name")
           pip install --upgrade pip
-          pip install "git+https://github.com/hubverse-org/hub-dashboard-predtimechart@main"
+          pip install "git+https://github.com/hubverse-org/hub-dashboard-predtimechart@$latest"
       - id: check-branch
         name: "Validate existence of ptc/data branch"
         env:
