@@ -127,7 +127,7 @@ default_permissions:
 name: The hubverse dashboard bot
 
 # The homepage of your GitHub App.
-url: https://hubverse.io
+url: https://docs.hubverse.io
 
 # A description of the GitHub App.
 description: A bot to auto-build dashboards
