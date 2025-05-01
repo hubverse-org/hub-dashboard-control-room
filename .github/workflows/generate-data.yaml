@@ -209,7 +209,10 @@ jobs:
           # Test if the oracle output is in the hub main branch or if its in the
           # dashboard oracle-data branch and use the appropriate one for the tool
           # https://matthewsetter.com/check-if-file-is-available-with-curl/
-          if [[ $(curl -o /dev/null --silent -Iw '%{http_code}' "$test") == 200 ]]; then
+          # NOTE: 2025-05-01
+          #   remove this once CDC gets official target data
+          #   https://github.com/reichlab/flusight-dashboard/issues/16#issuecomment-2843589897
+          if [[ ${REPO} != "cdcepi/FluSight-forecast-hub" && $(curl -o /dev/null --silent -Iw '%{http_code}' "$test") == 200 ]]; then
             oracle="$test"
           else
             oracle="${dashboard}/oracle-data/oracle-output.csv"
