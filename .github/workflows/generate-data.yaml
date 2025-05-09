@@ -354,7 +354,9 @@ jobs:
       name: ${{ needs.check.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
-    secrets: inherit
+    secrets:
+      id: ${{ secrets.id }}
+      key: ${{ secrets.key }}
   push-eval-data:
     name: "Push Evals to predevals/data branch"
     permissions:
@@ -370,4 +372,6 @@ jobs:
       name: ${{ needs.check.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
-    secrets: inherit
+    secrets:
+      id: ${{ secrets.id }}
+      key: ${{ secrets.key }}

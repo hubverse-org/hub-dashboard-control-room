@@ -125,4 +125,6 @@ jobs:
       name: ${{ needs.build-site.outputs.name }}
       slug: ${{ inputs.slug }}
       email: ${{ inputs.email }}
-    secrets: inherit
+    secrets:
+      id: ${{ secrets.id }}
+      key: ${{ secrets.key }}
