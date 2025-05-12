@@ -5,25 +5,31 @@ defaults:
 on:
   workflow_call:
     inputs:
-      repos:
-        required: false
-        type: string
+      # name of the repository owner. Use `${{ github.event.repository.owner.login }}`
       owner:
         required: false
         type: string
+      # name of the repository. Use `${{ github.event.repository.name }}`
       name:
         required: false
         type: string
+      # effectively identical to `owner`. Use `${{ github.event.repository.owner.login }}` 
       slug:
         required: true
         type: string
+      # github email for pushing. Use '${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com'
       email:
         required: true
         type: string
+      # boolean indicator if the site should be published to the `gh-pages` branch.
       publish:
         required: false
         type: boolean
         default: true
+      # [deprecated] a JSON object containing repositories to be built. This can be safely removed.
+      repos:
+        required: false
+        type: string
     secrets:
       id:
         required: true
