@@ -6,19 +6,19 @@ on:
   workflow_call:
     inputs:
       owner:
-        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
+        description: 'name of the repository org/owner. Use `github.event.repository.owner.login`'
         required: true
         type: string
       name:
-        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
+        description: 'name of the repository. Use `$github.event.repository.name`'
         required: true
         type: string
       slug:
-        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
+        description: 'User id. Use `$github.event.repository.owner.login'
         required: true
         type: string
       email:
-        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
+        description: 'github email for pushing. Use `$github.event.repository.owner.id+$github.event.repository.owner.login@users.noreply.github.com`'
         required: true
         type: string
       # the name of the orphan branch to push to
@@ -34,7 +34,7 @@ on:
         required: true
         type: boolean
     # This workflow is always called from another re-usable workflow, so you
-    # will pass id: ${{ secrets.id }} and key: ${{ secrets.key }}
+    # will pass id: secrets.id and key: secrets.key
     secrets:
       # 'none' (for same-repo builds) or the app ID of a GitHub app (cross-repo builds)
       id:

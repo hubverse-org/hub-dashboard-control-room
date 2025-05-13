@@ -6,19 +6,19 @@ on:
   workflow_call:
     inputs:
       owner:
-        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
+        description: 'name of the repository org/owner. Use `github.event.repository.owner.login`'
         required: false
         type: string
       name:
-        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
+        description: 'name of the repository. Use `$github.event.repository.name`'
         required: false
         type: string
       slug:
-        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
+        description: 'User id. Use `$github.event.repository.owner.login'
         required: true
         type: string
       email:
-        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
+        description: 'github email for pushing. Use `$github.event.repository.owner.id+$github.event.repository.owner.login@users.noreply.github.com`'
         required: true
         type: string
       publish:
@@ -36,7 +36,7 @@ on:
     # repositories without workflows).
     #
     # The default is a workflow-generated token, the pattern will be
-    #   id: 'none' and key: ${{ secrets.GITHUB_TOKEN }}
+    #   id: 'none' and key: secrets.GITHUB_TOKEN
     secrets:
       # 'none' (for same-repo builds) or the app ID of a GitHub app (cross-repo builds)
       id:
