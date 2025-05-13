@@ -5,36 +5,53 @@ defaults:
 on:
   workflow_call:
     inputs:
-      repos:
-        required: false
-        type: string
       owner:
+        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
         required: false
         type: string
       name:
+        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
         required: false
         type: string
       slug:
+        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
         required: true
         type: string
       email:
+        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
         required: true
         type: string
       publish:
+        description: '[boolean] indicator if the data should be published to the respective branch'
         default: true
         required: true
         type: boolean
       regenerate:
+        description: '[boolean] (predtimechart option) Setting this to TRUE regenerates all of the data'
         default: false
         required: true
         type: boolean
       build:
+        description: '(predtimechart option) This can take either "forecast", "target", or "both"'
         default: "both"
         required: false
         type: string
+      repos:
+        description: '[deprecated] a JSON object containing repositories to be built. This can be safely removed.'
+        required: false
+        type: string
+    # The secrets allow us to switch between using a workflow-generated token
+    # (for workflows that are being called from the dashboard repository) and a
+    # GitHub app, which needs to generate a temporary token (for dashboard
+    # repositories without workflows).
+    #
+    # The default is a workflow-generated token, the pattern will be
+    #   id: 'none' and key: ${{ secrets.GITHUB_TOKEN }}
     secrets:
+      # 'none' (for same-repo builds) or the app ID of a GitHub app (cross-repo builds)
       id:
         required: true
+      # a GitHub generated token (for same-repo builds) or the Private Key of a GitHub app (cross-repo builds)
       key:
         required: true
 
