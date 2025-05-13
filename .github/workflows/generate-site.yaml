@@ -5,29 +5,29 @@ defaults:
 on:
   workflow_call:
     inputs:
-      # name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`
       owner:
+        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
         required: false
         type: string
-      # name of the repository. Use `${{ github.event.repository.name }}`
       name:
+        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
         required: false
         type: string
-      # User id. Use `${{ github.event.repository.owner.login }}` 
       slug:
+        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
         required: true
         type: string
-      # github email for pushing. Use '${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com'
       email:
+        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
         required: true
         type: string
-      # boolean indicator if the site should be published to the `gh-pages` branch.
       publish:
-        required: false
-        type: boolean
+        description: '[boolean] indicator if the data should be published to the respective branch'
         default: true
-      # [deprecated] a JSON object containing repositories to be built. This can be safely removed.
+        required: true
+        type: boolean
       repos:
+        description: '[deprecated] a JSON object containing repositories to be built. This can be safely removed.'
         required: false
         type: string
     # The secrets allow us to switch between using a workflow-generated token

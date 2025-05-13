@@ -5,20 +5,20 @@ defaults:
 on:
   workflow_call:
     inputs:
-      # name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`
       owner:
+        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
         required: true
         type: string
-      # name of the repository. Use `${{ github.event.repository.name }}`
       name:
+        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
         required: true
         type: string
-      # User id. Use `${{ github.event.repository.owner.login }}` 
       slug:
+        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
         required: true
         type: string
-      # github email for pushing. Use '${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com'
       email:
+        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
         required: true
         type: string
       # the name of the orphan branch to push to

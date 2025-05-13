@@ -5,39 +5,39 @@ defaults:
 on:
   workflow_call:
     inputs:
-      # name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`
       owner:
+        description: 'name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`'
         required: false
         type: string
-      # name of the repository. Use `${{ github.event.repository.name }}`
       name:
+        description: 'name of the repository. Use `${{ github.event.repository.name }}`'
         required: false
         type: string
-      # User id. Use `${{ github.event.repository.owner.login }}` 
       slug:
+        description: 'User id. Use `${{ github.event.repository.owner.login }}` '
         required: true
         type: string
-      # github email for pushing. Use '${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com'
       email:
+        description: 'github email for pushing. Use `${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com`'
         required: true
         type: string
-      # [boolean] indicator if the data should be published to the respective branch
       publish:
+        description: '[boolean] indicator if the data should be published to the respective branch'
         default: true
         required: true
         type: boolean
-      # [boolean] (predtimechart option) Setting this to TRUE regenerates all of the data
       regenerate:
+        description: '[boolean] (predtimechart option) Setting this to TRUE regenerates all of the data'
         default: false
         required: true
         type: boolean
-      # (predtimechart option) This can take either "forecast", "target", or "both"
       build:
+        description: '(predtimechart option) This can take either "forecast", "target", or "both"'
         default: "both"
         required: false
         type: string
-      # [deprecated] a JSON object containing repositories to be built. This can be safely removed.
       repos:
+        description: '[deprecated] a JSON object containing repositories to be built. This can be safely removed.'
         required: false
         type: string
     # The secrets allow us to switch between using a workflow-generated token
