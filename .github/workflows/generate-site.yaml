@@ -5,7 +5,7 @@ defaults:
 on:
   workflow_call:
     inputs:
-      # name of the repository owner. Use `${{ github.event.repository.owner.login }}`
+      # name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`
       owner:
         required: false
         type: string
@@ -13,7 +13,7 @@ on:
       name:
         required: false
         type: string
-      # effectively identical to `owner`. Use `${{ github.event.repository.owner.login }}` 
+      # User id. Use `${{ github.event.repository.owner.login }}` 
       slug:
         required: true
         type: string
@@ -30,9 +30,18 @@ on:
       repos:
         required: false
         type: string
+    # The secrets allow us to switch between using a workflow-generated token
+    # (for workflows that are being called from the dashboard repository) and a
+    # GitHub app, which needs to generate a temporary token (for dashboard
+    # repositories without workflows).
+    #
+    # The default is a workflow-generated token, the pattern will be
+    #   id: 'none' and key: ${{ secrets.GITHUB_TOKEN }}
     secrets:
+      # 'none' (for same-repo builds) or the app ID of a GitHub app (cross-repo builds)
       id:
         required: true
+      # a GitHub generated token (for same-repo builds) or the Private Key of a GitHub app (cross-repo builds)
       key:
         required: true
 

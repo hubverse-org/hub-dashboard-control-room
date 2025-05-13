@@ -5,36 +5,53 @@ defaults:
 on:
   workflow_call:
     inputs:
-      repos:
-        required: false
-        type: string
+      # name of the repository org/owner. Use `${{ github.event.repository.owner.login }}`
       owner:
         required: false
         type: string
+      # name of the repository. Use `${{ github.event.repository.name }}`
       name:
         required: false
         type: string
+      # User id. Use `${{ github.event.repository.owner.login }}` 
       slug:
         required: true
         type: string
+      # github email for pushing. Use '${{ github.event.repository.owner.id }}+${{ github.event.repository.owner.login }}@users.noreply.github.com'
       email:
         required: true
         type: string
+      # [boolean] indicator if the data should be published to the respective branch
       publish:
         default: true
         required: true
         type: boolean
+      # [boolean] (predtimechart option) Setting this to TRUE regenerates all of the data
       regenerate:
         default: false
         required: true
         type: boolean
+      # (predtimechart option) This can take either "forecast", "target", or "both"
       build:
         default: "both"
         required: false
         type: string
+      # [deprecated] a JSON object containing repositories to be built. This can be safely removed.
+      repos:
+        required: false
+        type: string
+    # The secrets allow us to switch between using a workflow-generated token
+    # (for workflows that are being called from the dashboard repository) and a
+    # GitHub app, which needs to generate a temporary token (for dashboard
+    # repositories without workflows).
+    #
+    # The default is a workflow-generated token, the pattern will be
+    #   id: 'none' and key: ${{ secrets.GITHUB_TOKEN }}
     secrets:
+      # 'none' (for same-repo builds) or the app ID of a GitHub app (cross-repo builds)
       id:
         required: true
+      # a GitHub generated token (for same-repo builds) or the Private Key of a GitHub app (cross-repo builds)
       key:
         required: true
 
