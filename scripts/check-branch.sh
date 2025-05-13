@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Check if an orphan branch exists. If it does not exist, create it and push it
-# to the repository. This assumes you have an internet connection and a 
-# GitHub personal access token with `repo: write` permissions to the repository
+# to the repository. This assumes you have an internet connection and a
+# GitHub personal access token with `contents: write` scope.
 #
 # Required Software:
 #
@@ -10,6 +10,16 @@
 #
 # Usage:
 #   check-branch.sh <branch> <repo> <slug> <email> <token>
+#
+# ARGUMENTS
+#
+#   branch  the branch the output directory represents (defaults to `gh-pages`)
+#   repo    the repository to push to
+#   slug    slug of the pusher (e.g. hubdashboard[bot] or zkamvar)
+#   email   email of the pusher (e.g. 186236658+hubdashboard[bot]@users.noreply.github.com)
+#   token   GitHub Token used for authentication, must have `contents: write scope`
+#             associated with the <email>
+#
 # 
 # Example, checking for the gh-pages branch of the hubverse-org/hubverse-site repository:
 #   check-branch.sh \
