@@ -162,7 +162,7 @@ jobs:
     if: ${{ fromJSON(needs.check.outputs.eval-ok) }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/hubverse-org/hubpredevalsdata-docker:main
+      image: ghcr.io/hubverse-org/hubpredevalsdata-docker:latest
       ports:
         - 80
       volumes:
