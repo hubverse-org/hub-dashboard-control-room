@@ -16,8 +16,6 @@ on:
     types:
       - "registration"
       - "all"
-  schedule:
-    - cron: "17 19 * * *"
 
 jobs:
   repos:
