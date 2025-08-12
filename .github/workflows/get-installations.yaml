@@ -61,7 +61,7 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: hubverse-org/hub-dashboard-control-room
           persist-credentials: false
