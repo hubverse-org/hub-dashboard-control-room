@@ -178,7 +178,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: check-branch
@@ -260,7 +260,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.check.outputs.key }}-cfg
       - id: setup-snake
