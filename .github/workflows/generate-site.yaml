@@ -120,7 +120,7 @@ jobs:
         run: render.sh -u "$OWNER" -r "$REPO"
       - name: Upload artifact
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ steps.id.outputs.file }}
           path: '/site/pages/'
