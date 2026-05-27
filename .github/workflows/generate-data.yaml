@@ -216,26 +216,16 @@ jobs:
         name: "Generate scores data"
         env:
           REPO: ${{ needs.check.outputs.repo }}
-          HUB: ${{ needs.check.outputs.hub }}
         run: |
           ls -larth
           mkdir -p out/
           dashboard="https://raw.githubusercontent.com/${REPO}/refs/heads"
-          hub="https://raw.githubusercontent.com/${HUB}/refs/heads"
-          test="${hub}/main/target-data/oracle-output.csv"
-          # Test if the oracle output is in the hub main branch or if its in the
-          # dashboard oracle-data branch and use the appropriate one for the tool
-          # https://matthewsetter.com/check-if-file-is-available-with-curl/
-          if [[ $(curl -o /dev/null --silent -Iw '%{http_code}' "$test") == 200 ]]; then
-            oracle="$test"
-          else
-            oracle="${dashboard}/oracle-data/oracle-output.csv"
-          fi
+          legacy_url="${dashboard}/oracle-data/oracle-output.csv"
           create-predevals-data.R \
           -h repo \
           -c predevals-config.yml \
-          -d $oracle \
-          -o out
+          -o out \
+          --legacy-oracle-fallback "$legacy_url"
       - name: "Save scores data artifact"
         id: upload
         uses: actions/upload-artifact@v4
