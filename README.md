@@ -79,7 +79,10 @@ These are the generalized steps to generate the data and the site:
 
 ### Predtimechart data
 
-The general steps to generate the data for predtimechart are:
+The general steps to generate the data for predtimechart are (using the
+[`dashboard-test-hub-dashboard`](https://github.com/hubverse-org/dashboard-test-hub-dashboard)
++ [`dashboard-test-hub`](https://github.com/hubverse-org/dashboard-test-hub)
+test fixtures as a runnable example):
 
 1. install 
    [hub-dashboard-predtimechart](https://github.com/hubverse-org/hub-dashboard-predtimechart)
@@ -89,7 +92,14 @@ The general steps to generate the data for predtimechart are:
    pip install git+https://github.com/hubverse-org/hub-dashboard-predtimechart
    ```
 2. clone the dashboard repository and enter it (you only need the `predtimechart-config.yml`)
+   ```bash
+   git clone https://github.com/hubverse-org/dashboard-test-hub-dashboard
+   cd dashboard-test-hub-dashboard
+   ```
 3. clone the hub repository into `repo/`
+   ```bash
+   git clone https://github.com/hubverse-org/dashboard-test-hub repo
+   ```
 4. Generate the Predtimechart data
    ```bash
    mkdir -p out/targets/
@@ -110,27 +120,34 @@ The general steps to generate the data for predtimechart are:
 
 ### Evals Data
 
-1. clone the dashboard repository and enter it (you only need the `predevals-config.yml`)
-2. clone the hub repository into `repo/`
-3. Run the container:
-  ```bash
+Oracle output is auto-discovered from the hub's
+[`target-data/`](https://docs.hubverse.io/en/latest/user-guide/target-data.html)
+directory via `hubData::connect_target_oracle_output()`, which supports CSV,
+parquet, and partitioned parquet.
 
-  repo="cdcepi/FluSight-forecast-hub/" # change this to where the oracle data should be fetched from
-  prefix="https://raw.githubusercontent.com/${repo}/refs/heads"
-  oracle="${prefix}/oracle-data/oracle-output.csv"
-  docker run \
-    --platform=linux/amd64 \
-    --rm \
-    -ti \
-    -v "$(pwd)":"/site" \
-    ghcr.io/hubverse-org/hubPredEvalsData-docker:main \
-    create-predevals-data.R \
-      -h repo \
-      -c predevals-config.yml \
-      -d "$oracle" \
-      -o out
-  ```
-4. enter `repo/` and checkout the `predevals/data` branch
+1. clone the dashboard repository and enter it (you only need the `predevals-config.yml`)
+   ```bash
+   git clone https://github.com/hubverse-org/dashboard-test-hub-dashboard
+   cd dashboard-test-hub-dashboard
+   ```
+2. clone the hub repository into `repo/`
+   ```bash
+   git clone https://github.com/hubverse-org/dashboard-test-hub repo
+   ```
+3. Run the container:
+   ```bash
+   docker run \
+     --platform=linux/amd64 \
+     --rm \
+     -ti \
+     -v "$(pwd)":"/site" \
+     ghcr.io/hubverse-org/hubpredevalsdata-docker:latest \
+     create-predevals-data.R \
+       -h repo \
+       -c predevals-config.yml \
+       -o out
+   ```
+4. enter the dashboard repo and checkout the `predevals/data` branch
 5. copy the contents of `../out` to your current folder
 6. add, commit, and push
 
