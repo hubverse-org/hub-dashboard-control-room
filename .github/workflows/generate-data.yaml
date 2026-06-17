@@ -111,7 +111,7 @@ jobs:
           repositories: ${{ env.REPO }}
       - id: checkout-config
         name: "Fetch config files"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           token: ${{ steps.token.outputs.token || secrets.key }}
@@ -198,7 +198,7 @@ jobs:
       - id: checkout-data
         if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout predevals/data branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
@@ -207,7 +207,7 @@ jobs:
           path: 'out'
       - id: clone-repo
         name: "Fetch ${{ needs.check.outputs.hub }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           repository: ${{ needs.check.outputs.hub }}
@@ -282,7 +282,7 @@ jobs:
       - id: checkout-data
         if: ${{ fromJSON(steps.check-branch.outputs.fetch) }}
         name: "Checkout ptc/data branch"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ steps.token.outputs.token || secrets.key }}
           persist-credentials: false
@@ -291,7 +291,7 @@ jobs:
           path: 'out'
       - id: clone-repo
         name: "Fetch ${{ needs.check.outputs.hub }}"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           repository: ${{ needs.check.outputs.hub }}
