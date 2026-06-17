@@ -100,7 +100,7 @@ jobs:
           path: 'data'
           token: ${{ steps.token.outputs.token || secrets.key }}
       - id: fetch-artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ inputs.artifact }}
       - id: publish
