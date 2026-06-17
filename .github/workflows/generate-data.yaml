@@ -149,7 +149,7 @@ jobs:
       - name: "Save config files"
         if: ${{ fromJSON(steps.status.outputs.forecast-ok) || fromJSON(steps.status.outputs.eval-ok) }}
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.id.outputs.key }}-cfg
           path: 'cfg/'
@@ -228,7 +228,7 @@ jobs:
           --legacy-oracle-fallback "$legacy_url"
       - name: "Save scores data artifact"
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ needs.check.outputs.eval-art }}
           path: 'out/'
@@ -342,7 +342,7 @@ jobs:
           fi
       - name: "Save forecast data artifact"
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ needs.check.outputs.forecast-art }}
           path: 'out/'
